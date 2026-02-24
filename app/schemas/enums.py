@@ -1,6 +1,6 @@
 from enum import StrEnum
 
-class UserRole(str, StrEnum):
+class UserRole(StrEnum):
     HR = "HR"
     MENTOR = "MENTOR"
     JUNIOR = "JUNIOR"
