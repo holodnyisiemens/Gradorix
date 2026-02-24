@@ -15,7 +15,7 @@ class UserCreateDTO(BaseDTO):
 
     firstname: Optional[Annotated[str, MinLen(2), MaxLen(30)]]
     lastname: Optional[Annotated[str, MinLen(2), MaxLen(30)]]
-    is_active: Optional[bool] = True
+    is_active: Optional[bool]
 
 
 class UserReadDTO(BaseDTO):
