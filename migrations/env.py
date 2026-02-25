@@ -8,6 +8,7 @@ from alembic import context
 from app.core.config import settings
 from app.core.database import Base
 from app.models.challenge import Challenge #noqa
+from app.models.mentor_junior import MentorJunior #noqa
 from app.models.notification import Notification #noqa
 from app.models.user import User #noqa
 
