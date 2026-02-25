@@ -13,9 +13,10 @@ class UserCreateDTO(BaseDTO):
     password: Annotated[str, MinLen(6), MaxLen(72)]
     role: UserRole
 
-    firstname: Optional[Annotated[str, MinLen(2), MaxLen(30)]]
-    lastname: Optional[Annotated[str, MinLen(2), MaxLen(30)]]
-    is_active: Optional[bool]
+    firstname: Optional[Annotated[str, MinLen(2), MaxLen(30)]] = None
+    lastname: Optional[Annotated[str, MinLen(2), MaxLen(30)]] = None
+    
+    is_active: bool = True
 
 
 class UserReadDTO(BaseDTO):
