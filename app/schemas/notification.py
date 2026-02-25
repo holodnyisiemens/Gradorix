@@ -7,8 +7,7 @@ from app.schemas.base import BaseDTO
 class NotificationCreateDTO(BaseDTO):
     user_id: int
     message: Annotated[str, MaxLen(1000)]
-
-    is_read: Optional[bool]
+    is_read: bool = False
 
 
 class NotificationReadDTO(BaseDTO):
