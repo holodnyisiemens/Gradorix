@@ -1,7 +1,7 @@
 from typing import Optional
 
 from app.schemas.base import BaseDTO
-from app.schemas.enums import ChallengeJuniorProgress
+from app.core.enums import ChallengeJuniorProgress
 
 
 class ChallengeJuniorCreateDTO(BaseDTO):

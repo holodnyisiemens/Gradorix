@@ -4,7 +4,7 @@ from sqlalchemy import String, Enum as SQLEnum
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.core.database import Base
-from app.schemas.enums import ChallengeStatus
+from app.core.enums import ChallengeStatus
 
 
 class Challenge(Base):

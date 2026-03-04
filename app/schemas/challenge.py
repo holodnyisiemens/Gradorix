@@ -4,7 +4,7 @@ from typing import Annotated, Optional
 from pydantic import AnyUrl
 
 from app.schemas.base import BaseDTO
-from app.schemas.enums import ChallengeStatus
+from app.core.enums import ChallengeStatus
 
 
 class ChallengeCreateDTO(BaseDTO):

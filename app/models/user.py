@@ -4,7 +4,7 @@ from sqlalchemy import Boolean, LargeBinary, String, Enum as SQLEnum
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.core.database import Base
-from app.schemas.enums import UserRole
+from app.core.enums import UserRole
 
 
 class User(Base):

@@ -4,7 +4,7 @@ from typing import Annotated, Optional
 from pydantic import EmailStr
 
 from app.schemas.base import BaseDTO
-from app.schemas.enums import UserRole
+from app.core.enums import UserRole
 
 
 class UserCreateDTO(BaseDTO):
