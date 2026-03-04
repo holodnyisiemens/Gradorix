@@ -16,3 +16,8 @@ class MentorJunior(Base):
         ForeignKey("users.id", ondelete="CASCADE"),
         primary_key=True,
     )
+
+    assigned_by: Mapped[int] = mapped_column(
+        ForeignKey("users.id", ondelete="CASCADE"),
+        nullable=False,
+    )
