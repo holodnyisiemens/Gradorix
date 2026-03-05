@@ -4,3 +4,5 @@ __pycache__
 .env.local
 .vscode
 .pytest_cache
+.claude
+CLAUDE.md
