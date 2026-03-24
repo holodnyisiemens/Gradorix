@@ -4,9 +4,12 @@ from fastapi import HTTPException
 from sqlalchemy.exc import SQLAlchemyError, IntegrityError
 from starlette import status
 
+from auth.utils import decode_token
+
+
 from app.models.user import User
 from app.repositories.user_repository import UserRepository
-from app.schemas.user import UserCreateDTO, UserReadDTO, UserUpdateDTO
+from app.schemas.user import UserCreateDTO, UserReadDTO, UserUpdateDTO, UserLoginReadDTO
 
 
 class UserService:
@@ -115,3 +118,11 @@ class UserService:
         if user:
             return UserReadDTO.model_validate(user)
         return None
+    
+    async def get_by_email(self, value: str) -> Optional[UserLoginReadDTO]:
+        """Получить пользователя по email"""
+        user = await self.user_repo.get_by_field("email", value)
+        if user:
+            return UserLoginReadDTO.model_validate(user)
+        return None
+    
