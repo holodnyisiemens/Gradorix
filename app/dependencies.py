@@ -9,11 +9,32 @@ from app.repositories.challenge_repository import ChallengeRepository
 from app.repositories.mentor_junior_repository import MentorJuniorRepository
 from app.repositories.notification_repository import NotificationRepository
 from app.repositories.user_repository import UserRepository
+from app.repositories.calendar_event_repository import CalendarEventRepository
+from app.repositories.achievement_repository import AchievementRepository
+from app.repositories.user_achievement_repository import UserAchievementRepository
+from app.repositories.user_points_repository import UserPointsRepository
+from app.repositories.activity_repository import ActivityRepository
+from app.repositories.team_repository import TeamRepository
+from app.repositories.quiz_repository import QuizRepository
+from app.repositories.quiz_result_repository import QuizResultRepository
+from app.repositories.kb_repository import KBSectionRepository, KBArticleRepository
+from app.repositories.meeting_attendance_repository import MeetingAttendanceRepository
+
 from app.services.challenge_junior_service import ChallengeJuniorService
 from app.services.challenge_service import ChallengeService
 from app.services.mentor_junior_service import MentorJuniorService
 from app.services.notification_service import NotificationService
 from app.services.user_service import UserService
+from app.services.calendar_event_service import CalendarEventService
+from app.services.achievement_service import AchievementService
+from app.services.user_achievement_service import UserAchievementService
+from app.services.user_points_service import UserPointsService
+from app.services.activity_service import ActivityService
+from app.services.team_service import TeamService
+from app.services.quiz_service import QuizService
+from app.services.quiz_result_service import QuizResultService
+from app.services.kb_service import KBSectionService, KBArticleService
+from app.services.meeting_attendance_service import MeetingAttendanceService
 
 
 async def get_session() -> AsyncSession:
@@ -44,8 +65,63 @@ def get_challenge_junior_service(session: SessionDep) -> ChallengeJuniorService:
     return ChallengeJuniorService(ChallengeJuniorRepository(session))
 
 
+def get_calendar_event_service(session: SessionDep) -> CalendarEventService:
+    return CalendarEventService(CalendarEventRepository(session))
+
+
+def get_achievement_service(session: SessionDep) -> AchievementService:
+    return AchievementService(AchievementRepository(session))
+
+
+def get_user_achievement_service(session: SessionDep) -> UserAchievementService:
+    return UserAchievementService(UserAchievementRepository(session))
+
+
+def get_user_points_service(session: SessionDep) -> UserPointsService:
+    return UserPointsService(UserPointsRepository(session))
+
+
+def get_activity_service(session: SessionDep) -> ActivityService:
+    return ActivityService(ActivityRepository(session))
+
+
+def get_team_service(session: SessionDep) -> TeamService:
+    return TeamService(TeamRepository(session))
+
+
+def get_quiz_service(session: SessionDep) -> QuizService:
+    return QuizService(QuizRepository(session))
+
+
+def get_quiz_result_service(session: SessionDep) -> QuizResultService:
+    return QuizResultService(QuizResultRepository(session))
+
+
+def get_kb_section_service(session: SessionDep) -> KBSectionService:
+    return KBSectionService(KBSectionRepository(session))
+
+
+def get_kb_article_service(session: SessionDep) -> KBArticleService:
+    return KBArticleService(KBArticleRepository(session))
+
+
+def get_meeting_attendance_service(session: SessionDep) -> MeetingAttendanceService:
+    return MeetingAttendanceService(MeetingAttendanceRepository(session))
+
+
 UserServiceDep = Annotated[UserService, Depends(get_user_service)]
 MentorJuniorServiceDep = Annotated[MentorJuniorService, Depends(get_mentor_junior_service)]
 NotificationServiceDep = Annotated[NotificationService, Depends(get_notification_service)]
 ChallengeServiceDep = Annotated[ChallengeService, Depends(get_challenge_service)]
 ChallengeJuniorServiceDep = Annotated[ChallengeJuniorService, Depends(get_challenge_junior_service)]
+CalendarEventServiceDep = Annotated[CalendarEventService, Depends(get_calendar_event_service)]
+AchievementServiceDep = Annotated[AchievementService, Depends(get_achievement_service)]
+UserAchievementServiceDep = Annotated[UserAchievementService, Depends(get_user_achievement_service)]
+UserPointsServiceDep = Annotated[UserPointsService, Depends(get_user_points_service)]
+ActivityServiceDep = Annotated[ActivityService, Depends(get_activity_service)]
+TeamServiceDep = Annotated[TeamService, Depends(get_team_service)]
+QuizServiceDep = Annotated[QuizService, Depends(get_quiz_service)]
+QuizResultServiceDep = Annotated[QuizResultService, Depends(get_quiz_result_service)]
+KBSectionServiceDep = Annotated[KBSectionService, Depends(get_kb_section_service)]
+KBArticleServiceDep = Annotated[KBArticleService, Depends(get_kb_article_service)]
+MeetingAttendanceServiceDep = Annotated[MeetingAttendanceService, Depends(get_meeting_attendance_service)]

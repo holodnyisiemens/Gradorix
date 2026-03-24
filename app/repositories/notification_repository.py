@@ -37,7 +37,9 @@ class NotificationRepository:
 
         return notification
 
-    async def get_all(self) -> list[Notification]:
+    async def get_all(self, user_id: Optional[int] = None) -> list[Notification]:
         stmt = select(Notification)
+        if user_id is not None:
+            stmt = stmt.where(Notification.user_id == user_id)
         result = await self.session.execute(stmt)
         return result.scalars().all()

@@ -1,5 +1,6 @@
 from enum import StrEnum
 
+
 class UserRole(StrEnum):
     HR = "HR"
     MENTOR = "MENTOR"
@@ -19,3 +20,38 @@ class ChallengeJuniorProgress(StrEnum):
     IN_PROGRESS = "IN_PROGRESS"
     DONE = "DONE"
     SKIPPED = "SKIPPED"
+
+
+class CalendarEventType(StrEnum):
+    CHALLENGE = "challenge"
+    MEETING = "meeting"
+    DEADLINE = "deadline"
+
+
+class AchievementCategory(StrEnum):
+    MILESTONE = "milestone"
+    CHALLENGE = "challenge"
+    STREAK = "streak"
+    SOCIAL = "social"
+    SPECIAL = "special"
+
+
+class ActivityStatus(StrEnum):
+    PENDING = "pending"
+    APPROVED = "approved"
+    REJECTED = "rejected"
+    REVISION = "revision"
+
+
+class ActivityType(StrEnum):
+    ACHIEVEMENT = "achievement"
+    TASK = "task"
+    TEST = "test"
+    EVENT = "event"
+    CUSTOM = "custom"
+
+
+class TeamStatus(StrEnum):
+    ACTIVE = "active"
+    ON_HOLD = "on_hold"
+    COMPLETED = "completed"

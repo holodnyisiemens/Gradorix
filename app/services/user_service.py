@@ -4,9 +4,6 @@ from fastapi import HTTPException
 from sqlalchemy.exc import SQLAlchemyError, IntegrityError
 from starlette import status
 
-from auth.utils import decode_token
-
-
 from app.models.user import User
 from app.repositories.user_repository import UserRepository
 from app.schemas.user import UserCreateDTO, UserReadDTO, UserUpdateDTO, UserLoginReadDTO

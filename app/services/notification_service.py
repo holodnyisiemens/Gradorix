@@ -1,3 +1,5 @@
+from typing import Optional
+
 from fastapi import HTTPException
 from sqlalchemy.exc import SQLAlchemyError, IntegrityError
 from starlette import status
@@ -84,7 +86,7 @@ class NotificationService:
 
         return NotificationReadDTO.model_validate(notification)
 
-    async def get_all(self) -> list[NotificationReadDTO]:
-        """Получить все уведомления"""
-        notifications = await self.notification_repo.get_all()
+    async def get_all(self, user_id: Optional[int] = None) -> list[NotificationReadDTO]:
+        """Получить все уведомления, опционально — по пользователю"""
+        notifications = await self.notification_repo.get_all(user_id=user_id)
         return [NotificationReadDTO.model_validate(n) for n in notifications]

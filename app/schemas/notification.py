@@ -1,3 +1,4 @@
+import datetime
 from annotated_types import MaxLen
 from typing import Annotated, Optional
 
@@ -15,6 +16,7 @@ class NotificationReadDTO(BaseDTO):
     user_id: int
     message: str
     is_read: bool
+    created_at: Optional[datetime.datetime] = None
 
 
 class NotificationUpdateDTO(BaseDTO):

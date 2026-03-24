@@ -1,4 +1,3 @@
-import bcrypt
 from datetime import datetime, timedelta
 from jose import jwt, JWTError
 from fastapi import Depends, HTTPException, status
@@ -8,29 +7,11 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.config import settings
 from app.core.enums import UserRole
 from app.models.user import User
-from app.repositories.user_repository import UserRepository
+from app.auth.password import hash_password, validate_password
 from app.dependencies import get_session
 
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
-
-
-def hash_password(
-    password: str,
-) -> bytes:
-    salt = bcrypt.gensalt()
-    password_bytes = password.encode()
-    return bcrypt.hashpw(password_bytes, salt)
-
-
-def validate_password(
-    password: str,
-    hashed_password: bytes,
-) -> bool:
-    return bcrypt.checkpw(
-        password=password.encode(),
-        hashed_password=hashed_password,
-    )
 
 
 def create_access_token(user_id: int) -> str:
@@ -58,6 +39,7 @@ async def get_current_user(
     except Exception:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token")
 
+    from app.repositories.user_repository import UserRepository
     user = await UserRepository(db).get_by_id(user_id)
     if not user:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="User not found")

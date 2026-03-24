@@ -37,7 +37,11 @@ class MentorJuniorRepository:
 
         return mentor_junior
 
-    async def get_all(self) -> list[MentorJunior]:
+    async def get_all(self, mentor_id: Optional[int] = None, junior_id: Optional[int] = None) -> list[MentorJunior]:
         stmt = select(MentorJunior)
+        if mentor_id is not None:
+            stmt = stmt.where(MentorJunior.mentor_id == mentor_id)
+        if junior_id is not None:
+            stmt = stmt.where(MentorJunior.junior_id == junior_id)
         result = await self.session.execute(stmt)
         return result.scalars().all()

@@ -1,3 +1,4 @@
+import datetime
 from annotated_types import MaxLen
 from typing import Annotated, Optional
 
@@ -12,6 +13,7 @@ class ChallengeCreateDTO(BaseDTO):
     description: Optional[Annotated[str, MaxLen(1000)]] = None
     url: Optional[Annotated[AnyUrl, MaxLen(500)]] = None
     status: ChallengeStatus
+    date: Optional[datetime.date] = None
 
 
 class ChallengeReadDTO(BaseDTO):
@@ -20,6 +22,7 @@ class ChallengeReadDTO(BaseDTO):
     description: Optional[str]
     url: Optional[AnyUrl]
     status: ChallengeStatus
+    date: Optional[datetime.date] = None
 
 
 class ChallengeUpdateDTO(BaseDTO):
@@ -27,3 +30,4 @@ class ChallengeUpdateDTO(BaseDTO):
     description: Optional[Annotated[str, MaxLen(1000)]] = None
     url: Optional[Annotated[AnyUrl, MaxLen(500)]] = None
     status: Optional[ChallengeStatus] = None
+    date: Optional[datetime.date] = None
