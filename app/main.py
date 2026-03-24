@@ -17,6 +17,7 @@ from app.routers import (
     quiz_results,
     kb,
     meeting_attendance,
+    auth
 )
 
 app = FastAPI(title="Gradorix")
@@ -36,6 +37,7 @@ app.include_router(quizzes.router)
 app.include_router(quiz_results.router)
 app.include_router(kb.router)
 app.include_router(meeting_attendance.router)
+app.include_router(auth.router)
 
 if __name__ == "__main__":
     import uvicorn
