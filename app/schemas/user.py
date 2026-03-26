@@ -35,7 +35,7 @@ class UserLoginReadDTO(BaseDTO):
     username: str
     email: EmailStr
     role: UserRole
-    password_hash: str
+    password_hash: bytes
 
     firstname: Optional[str]
     lastname: Optional[str]

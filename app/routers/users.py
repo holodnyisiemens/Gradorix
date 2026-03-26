@@ -1,6 +1,8 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
 
+from app.auth.utils import get_current_user
 from app.dependencies import UserServiceDep
+from app.models.user import User as UserModel
 from app.schemas.user import UserCreateDTO, UserReadDTO, UserUpdateDTO
 
 router = APIRouter(prefix="/users", tags=["Users"])
@@ -9,6 +11,11 @@ router = APIRouter(prefix="/users", tags=["Users"])
 @router.get("/", response_model=list[UserReadDTO])
 async def get_all_users(service: UserServiceDep):
     return await service.get_all()
+
+
+@router.get("/me", response_model=UserReadDTO)
+async def get_me(current_user: UserModel = Depends(get_current_user)):
+    return current_user
 
 
 @router.get("/{user_id}", response_model=UserReadDTO)

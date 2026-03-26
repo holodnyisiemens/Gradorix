@@ -74,7 +74,11 @@ def get_achievement_service(session: SessionDep) -> AchievementService:
 
 
 def get_user_achievement_service(session: SessionDep) -> UserAchievementService:
-    return UserAchievementService(UserAchievementRepository(session))
+    return UserAchievementService(
+        UserAchievementRepository(session),
+        AchievementRepository(session),
+        UserPointsRepository(session),
+    )
 
 
 def get_user_points_service(session: SessionDep) -> UserPointsService:
@@ -82,7 +86,7 @@ def get_user_points_service(session: SessionDep) -> UserPointsService:
 
 
 def get_activity_service(session: SessionDep) -> ActivityService:
-    return ActivityService(ActivityRepository(session))
+    return ActivityService(ActivityRepository(session), UserPointsRepository(session))
 
 
 def get_team_service(session: SessionDep) -> TeamService:

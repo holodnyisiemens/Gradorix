@@ -25,12 +25,12 @@ async def login(
     data: UserLogin,
     service: UserServiceDep
 ):
-    user = await service.get_by_email("email", data.email)
+    user = await service.get_by_email(data.email)
 
     if not user:
         raise HTTPException(401, "Invalid credentials")
 
-    if not validate_password(data.password, user):
+    if not validate_password(data.password, user.password_hash):
         raise HTTPException(401, "Invalid credentials")
 
     access_token = create_access_token(user.id)
