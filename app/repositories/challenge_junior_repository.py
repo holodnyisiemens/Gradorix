@@ -37,7 +37,11 @@ class ChallengeJuniorRepository:
 
         return challenge_junior
 
-    async def get_all(self) -> list[ChallengeJunior]:
+    async def get_all(self, junior_id: Optional[int] = None, assigned_by: Optional[int] = None) -> list[ChallengeJunior]:
         stmt = select(ChallengeJunior)
+        if junior_id is not None:
+            stmt = stmt.where(ChallengeJunior.junior_id == junior_id)
+        if assigned_by is not None:
+            stmt = stmt.where(ChallengeJunior.assigned_by == assigned_by)
         result = await self.session.execute(stmt)
         return result.scalars().all()

@@ -1,3 +1,5 @@
+from typing import Optional
+
 from fastapi import APIRouter
 
 from app.dependencies import NotificationServiceDep
@@ -7,8 +9,8 @@ router = APIRouter(prefix="/notifications", tags=["Notifications"])
 
 
 @router.get("/", response_model=list[NotificationReadDTO])
-async def get_all(service: NotificationServiceDep):
-    return await service.get_all()
+async def get_all(user_id: Optional[int] = None, service: NotificationServiceDep = ...):
+    return await service.get_all(user_id=user_id)
 
 
 @router.get("/{notification_id}", response_model=NotificationReadDTO)

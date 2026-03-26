@@ -7,10 +7,23 @@ from alembic import context
 
 from app.core.config import settings
 from app.core.database import Base
-from app.models.challenge import Challenge #noqa
-from app.models.mentor_junior import MentorJunior #noqa
-from app.models.notification import Notification #noqa
-from app.models.user import User #noqa
+from app.models.challenge import Challenge  # noqa
+from app.models.challenge_junior import ChallengeJunior  # noqa
+from app.models.mentor_junior import MentorJunior  # noqa
+from app.models.notification import Notification  # noqa
+from app.models.user import User  # noqa
+from app.models.calendar_event import CalendarEvent  # noqa
+from app.models.achievement import Achievement  # noqa
+from app.models.user_achievement import UserAchievement  # noqa
+from app.models.user_points import UserPoints  # noqa
+from app.models.activity import Activity  # noqa
+from app.models.team import Team  # noqa
+from app.models.team_member import TeamMember  # noqa
+from app.models.quiz import Quiz  # noqa
+from app.models.quiz_result import QuizResult  # noqa
+from app.models.kb_section import KBSection  # noqa
+from app.models.kb_article import KBArticle  # noqa
+from app.models.meeting_attendance import MeetingAttendance  # noqa
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.

@@ -3,7 +3,7 @@ from typing import Optional
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.auth.utils import hash_password
+from app.auth.password import hash_password
 from app.models.user import User
 from app.schemas.user import UserCreateDTO, UserUpdateDTO
 

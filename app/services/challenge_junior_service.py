@@ -1,3 +1,5 @@
+from typing import Optional
+
 from fastapi import HTTPException
 from sqlalchemy.exc import SQLAlchemyError, IntegrityError
 from starlette import status
@@ -91,7 +93,7 @@ class ChallengeJuniorService:
 
         return ChallengeJuniorReadDTO.model_validate(challenge_junior)
 
-    async def get_all(self) -> list[ChallengeJuniorReadDTO]:
-        """Получить все назначения"""
-        assignments = await self.challenge_junior_repo.get_all()
+    async def get_all(self, junior_id: Optional[int] = None, assigned_by: Optional[int] = None) -> list[ChallengeJuniorReadDTO]:
+        """Получить все назначения, опционально с фильтрацией"""
+        assignments = await self.challenge_junior_repo.get_all(junior_id=junior_id, assigned_by=assigned_by)
         return [ChallengeJuniorReadDTO.model_validate(a) for a in assignments]

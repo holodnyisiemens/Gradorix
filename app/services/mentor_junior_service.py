@@ -1,3 +1,5 @@
+from typing import Optional
+
 from fastapi import HTTPException
 from sqlalchemy.exc import SQLAlchemyError, IntegrityError
 from starlette import status
@@ -91,7 +93,7 @@ class MentorJuniorService:
 
         return MentorJuniorReadDTO.model_validate(mentor_junior)
 
-    async def get_all(self) -> list[MentorJuniorReadDTO]:
-        """Получить все связи ментор-джуниор"""
-        pairs = await self.mentor_junior_repo.get_all()
+    async def get_all(self, mentor_id: Optional[int] = None, junior_id: Optional[int] = None) -> list[MentorJuniorReadDTO]:
+        """Получить все связи ментор-джуниор, опционально с фильтрацией"""
+        pairs = await self.mentor_junior_repo.get_all(mentor_id=mentor_id, junior_id=junior_id)
         return [MentorJuniorReadDTO.model_validate(p) for p in pairs]

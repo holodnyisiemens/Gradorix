@@ -1,6 +1,7 @@
+import datetime
 from typing import Optional
 
-from sqlalchemy import String, Enum as SQLEnum
+from sqlalchemy import Date, String, Enum as SQLEnum
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.core.database import Base
@@ -18,3 +19,5 @@ class Challenge(Base):
     url: Mapped[Optional[str]] = mapped_column(String(500), nullable=True)
 
     status: Mapped[ChallengeStatus] = mapped_column(SQLEnum(ChallengeStatus, name="challenge_status"), nullable=False)
+
+    date: Mapped[Optional[datetime.date]] = mapped_column(Date, nullable=True)

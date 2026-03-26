@@ -30,6 +30,18 @@ class UserReadDTO(BaseDTO):
     is_active: bool
 
 
+class UserLoginReadDTO(BaseDTO):
+    id: int
+    username: str
+    email: EmailStr
+    role: UserRole
+    password_hash: bytes
+
+    firstname: Optional[str]
+    lastname: Optional[str]
+    is_active: bool
+
+
 class UserUpdateDTO(BaseDTO):
     username: Optional[Annotated[str, MinLen(3), MaxLen(30)]] = None
     email: Optional[Annotated[EmailStr, MaxLen(255)]] = None
@@ -43,3 +55,8 @@ class UserUpdateDTO(BaseDTO):
 class UserChangePasswordDTO(BaseDTO):
     old_password: Annotated[str, MinLen(6), MaxLen(72)]
     new_password: Annotated[str, MinLen(6), MaxLen(72)]
+
+
+class UserLogin(BaseDTO):
+    email: EmailStr
+    password: str

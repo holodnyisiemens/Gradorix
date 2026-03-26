@@ -1,3 +1,5 @@
+from typing import Optional
+
 from fastapi import APIRouter
 
 from app.dependencies import MentorJuniorServiceDep
@@ -7,8 +9,8 @@ router = APIRouter(prefix="/mentor-junior", tags=["Mentor-Junior"])
 
 
 @router.get("/", response_model=list[MentorJuniorReadDTO])
-async def get_all(service: MentorJuniorServiceDep):
-    return await service.get_all()
+async def get_all(mentor_id: Optional[int] = None, junior_id: Optional[int] = None, service: MentorJuniorServiceDep = ...):
+    return await service.get_all(mentor_id=mentor_id, junior_id=junior_id)
 
 
 @router.get("/{mentor_id}/{junior_id}", response_model=MentorJuniorReadDTO)
