@@ -26,7 +26,7 @@ class KBArticleCreateDTO(BaseDTO):
     section_id: int
     title: Annotated[str, MaxLen(255)]
     content: str
-    created_at: datetime.date
+    created_at: datetime.date = datetime.date.today()
     author: Annotated[str, MaxLen(100)]
 
 
