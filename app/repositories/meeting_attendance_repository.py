@@ -34,12 +34,12 @@ class MeetingAttendanceRepository:
 
     async def get_all(
         self,
-        event_id: Optional[int] = None,
+        activity_id: Optional[int] = None,
         user_id: Optional[int] = None,
     ) -> list[MeetingAttendance]:
         stmt = select(MeetingAttendance)
-        if event_id is not None:
-            stmt = stmt.where(MeetingAttendance.event_id == event_id)
+        if activity_id is not None:
+            stmt = stmt.where(MeetingAttendance.activity_id == activity_id)
         if user_id is not None:
             stmt = stmt.where(MeetingAttendance.user_id == user_id)
         result = await self.session.execute(stmt)

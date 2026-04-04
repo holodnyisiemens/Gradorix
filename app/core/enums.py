@@ -22,6 +22,25 @@ class ChallengeJuniorProgress(StrEnum):
     SKIPPED = "SKIPPED"
 
 
+class TaskStatus(StrEnum):
+    DRAFT = "DRAFT"
+    UPCOMING = "UPCOMING"
+    ACTIVE = "ACTIVE"
+    COMPLETED = "COMPLETED"
+    CANCELLED = "CANCELLED"
+    # PENDING = "pending"
+    # APPROVED = "approved"
+    # REJECTED = "rejected"
+    # REVISION = "revision"
+
+
+class EventStatus(StrEnum):
+    SCHEDULED = "scheduled"
+    ONGOING = "ongoing"
+    COMPLETED = "completed"
+    CANCELLED = "cancelled"
+
+
 class CalendarEventType(StrEnum):
     CHALLENGE = "challenge"
     MEETING = "meeting"
@@ -34,13 +53,6 @@ class AchievementCategory(StrEnum):
     STREAK = "streak"
     SOCIAL = "social"
     SPECIAL = "special"
-
-
-class ActivityStatus(StrEnum):
-    PENDING = "pending"
-    APPROVED = "approved"
-    REJECTED = "rejected"
-    REVISION = "revision"
 
 
 class ActivityType(StrEnum):

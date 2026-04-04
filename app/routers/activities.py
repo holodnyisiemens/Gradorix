@@ -4,7 +4,7 @@ from fastapi import APIRouter
 
 from app.dependencies import ActivityServiceDep
 from app.schemas.activity import ActivityCreateDTO, ActivityReadDTO, ActivityUpdateDTO
-from app.core.enums import ActivityStatus
+from app.core.enums import ActivityType, EventStatus, TaskStatus
 
 router = APIRouter(prefix="/activities", tags=["Activities"])
 
@@ -12,10 +12,17 @@ router = APIRouter(prefix="/activities", tags=["Activities"])
 @router.get("/", response_model=list[ActivityReadDTO])
 async def get_all(
     user_id: Optional[int] = None,
-    activity_status: Optional[ActivityStatus] = None,
+    activity_type: Optional[ActivityType] = None,
+    task_status: Optional[TaskStatus] = None,
+    event_status: Optional[EventStatus] = None,
     service: ActivityServiceDep = ...,
 ):
-    return await service.get_all(user_id=user_id, activity_status=activity_status)
+    return await service.get_all(
+        user_id=user_id,
+        activity_type=activity_type,
+        task_status=task_status,
+        event_status=event_status,
+    )
 
 
 @router.get("/{activity_id}", response_model=ActivityReadDTO)

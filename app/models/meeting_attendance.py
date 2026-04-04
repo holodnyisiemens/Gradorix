@@ -12,8 +12,8 @@ class MeetingAttendance(Base):
 
     id: Mapped[int] = mapped_column(primary_key=True)
 
-    event_id: Mapped[int] = mapped_column(
-        ForeignKey("calendar_events.id", ondelete="CASCADE"),
+    activity_id: Mapped[int] = mapped_column(
+        ForeignKey("activities.id", ondelete="CASCADE"),
         nullable=False,
     )
 

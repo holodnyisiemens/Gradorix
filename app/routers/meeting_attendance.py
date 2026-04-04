@@ -10,11 +10,11 @@ router = APIRouter(prefix="/meeting-attendance", tags=["Meeting Attendance"])
 
 @router.get("/", response_model=list[MeetingAttendanceReadDTO])
 async def get_all(
-    event_id: Optional[int] = None,
+    activity_id: Optional[int] = None,
     user_id: Optional[int] = None,
     service: MeetingAttendanceServiceDep = ...,
 ):
-    return await service.get_all(event_id=event_id, user_id=user_id)
+    return await service.get_all(activity_id=activity_id, user_id=user_id)
 
 
 @router.get("/{attendance_id}", response_model=MeetingAttendanceReadDTO)

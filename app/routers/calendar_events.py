@@ -5,7 +5,7 @@ from fastapi import APIRouter
 
 from app.dependencies import CalendarEventServiceDep
 from app.schemas.calendar_event import CalendarEventCreateDTO, CalendarEventReadDTO, CalendarEventUpdateDTO
-from app.core.enums import CalendarEventType
+from app.core.enums import CalendarEventType, EventStatus
 
 router = APIRouter(prefix="/calendar-events", tags=["Calendar Events"])
 
@@ -14,9 +14,10 @@ router = APIRouter(prefix="/calendar-events", tags=["Calendar Events"])
 async def get_all(
     date: Optional[datetime.date] = None,
     event_type: Optional[CalendarEventType] = None,
+    status: Optional[EventStatus] = None,
     service: CalendarEventServiceDep = ...,
 ):
-    return await service.get_all(date=date, event_type=event_type)
+    return await service.get_all(date=date, event_type=event_type, status=status)
 
 
 @router.get("/{event_id}", response_model=CalendarEventReadDTO)

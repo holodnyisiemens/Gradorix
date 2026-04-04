@@ -11,8 +11,8 @@ class ChallengeJuniorRepository:
     def __init__(self, session: AsyncSession):
         self.session = session
 
-    async def get_by_id(self, challenge_id: int, junior_id: int) -> Optional[ChallengeJunior]:
-        return await self.session.get(ChallengeJunior, (challenge_id, junior_id))
+    async def get_by_id(self, activity_id: int, junior_id: int) -> Optional[ChallengeJunior]:
+        return await self.session.get(ChallengeJunior, (activity_id, junior_id))
 
     async def create(self, challenge_junior_data: ChallengeJuniorCreateDTO) -> ChallengeJunior:
         challenge_junior = ChallengeJunior(**challenge_junior_data.model_dump())

@@ -5,7 +5,7 @@ from app.schemas.base import BaseDTO
 
 
 class MeetingAttendanceCreateDTO(BaseDTO):
-    event_id: int
+    activity_id: int
     user_id: int
     attended: bool = False
     marked_at: Optional[datetime.datetime] = None
@@ -14,7 +14,7 @@ class MeetingAttendanceCreateDTO(BaseDTO):
 
 class MeetingAttendanceReadDTO(BaseDTO):
     id: int
-    event_id: int
+    activity_id: int
     user_id: int
     attended: bool
     marked_at: Optional[datetime.datetime] = None

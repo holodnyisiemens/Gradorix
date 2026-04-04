@@ -1,3 +1,4 @@
+import datetime
 from typing import Optional
 
 from sqlalchemy import select
@@ -5,7 +6,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.activity import Activity
 from app.schemas.activity import ActivityCreateDTO, ActivityUpdateDTO
-from app.core.enums import ActivityStatus
+from app.core.enums import ActivityType, CalendarEventType, EventStatus, TaskStatus
 
 
 class ActivityRepository:
@@ -36,12 +37,24 @@ class ActivityRepository:
     async def get_all(
         self,
         user_id: Optional[int] = None,
-        status: Optional[ActivityStatus] = None,
+        activity_type: Optional[ActivityType] = None,
+        task_status: Optional[TaskStatus] = None,
+        event_status: Optional[EventStatus] = None,
+        date: Optional[datetime.date] = None,
+        event_type: Optional[CalendarEventType] = None,
     ) -> list[Activity]:
         stmt = select(Activity)
         if user_id is not None:
             stmt = stmt.where(Activity.user_id == user_id)
-        if status is not None:
-            stmt = stmt.where(Activity.status == status)
+        if activity_type is not None:
+            stmt = stmt.where(Activity.activity_type == activity_type)
+        if task_status is not None:
+            stmt = stmt.where(Activity.task_status == task_status)
+        if event_status is not None:
+            stmt = stmt.where(Activity.event_status == event_status)
+        if date is not None:
+            stmt = stmt.where(Activity.date == date)
+        if event_type is not None:
+            stmt = stmt.where(Activity.event_type == event_type)
         result = await self.session.execute(stmt)
         return result.scalars().all()

@@ -8,8 +8,8 @@ from app.core.enums import ChallengeJuniorProgress
 class ChallengeJunior(Base):
     __tablename__ = "challenge_junior"
 
-    challenge_id: Mapped[int] = mapped_column(
-        ForeignKey("challenges.id", ondelete="CASCADE"),
+    activity_id: Mapped[int] = mapped_column(
+        ForeignKey("activities.id", ondelete="CASCADE"),
         primary_key=True,
     )
 

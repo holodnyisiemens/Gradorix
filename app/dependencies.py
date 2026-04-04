@@ -5,11 +5,9 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.database import async_session_factory
 from app.repositories.challenge_junior_repository import ChallengeJuniorRepository
-from app.repositories.challenge_repository import ChallengeRepository
 from app.repositories.mentor_junior_repository import MentorJuniorRepository
 from app.repositories.notification_repository import NotificationRepository
 from app.repositories.user_repository import UserRepository
-from app.repositories.calendar_event_repository import CalendarEventRepository
 from app.repositories.achievement_repository import AchievementRepository
 from app.repositories.user_achievement_repository import UserAchievementRepository
 from app.repositories.user_points_repository import UserPointsRepository
@@ -58,15 +56,18 @@ def get_notification_service(session: SessionDep) -> NotificationService:
 
 
 def get_challenge_service(session: SessionDep) -> ChallengeService:
-    return ChallengeService(ChallengeRepository(session))
+    return ChallengeService(ActivityRepository(session), UserPointsRepository(session))
 
 
 def get_challenge_junior_service(session: SessionDep) -> ChallengeJuniorService:
-    return ChallengeJuniorService(ChallengeJuniorRepository(session))
+    return ChallengeJuniorService(
+        ChallengeJuniorRepository(session),
+        ActivityRepository(session)
+    )
 
 
 def get_calendar_event_service(session: SessionDep) -> CalendarEventService:
-    return CalendarEventService(CalendarEventRepository(session))
+    return CalendarEventService(ActivityRepository(session), UserPointsRepository(session))
 
 
 def get_achievement_service(session: SessionDep) -> AchievementService:
@@ -110,7 +111,10 @@ def get_kb_article_service(session: SessionDep) -> KBArticleService:
 
 
 def get_meeting_attendance_service(session: SessionDep) -> MeetingAttendanceService:
-    return MeetingAttendanceService(MeetingAttendanceRepository(session))
+    return MeetingAttendanceService(
+        MeetingAttendanceRepository(session),
+        ActivityRepository(session)
+    )
 
 
 UserServiceDep = Annotated[UserService, Depends(get_user_service)]
