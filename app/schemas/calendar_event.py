@@ -22,7 +22,7 @@ class CalendarEventReadDTO(BaseDTO):
     date: datetime.date
     event_type: CalendarEventType
     status: EventStatus
-    challenge_id: Optional[int] = None
+    activity_id: Optional[int] = None
     description: Optional[str] = None
 
 

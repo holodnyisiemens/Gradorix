@@ -29,7 +29,7 @@ class CalendarEventService:
             date=activity.date,
             event_type=activity.event_type,
             status=activity.event_status,
-            challenge_id=activity.challenge_id,
+            activity_id=activity.id,
             description=activity.description,
         )
 
