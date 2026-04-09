@@ -30,6 +30,8 @@ class Settings(BaseSettings):
     HASH_ALGORITHM: str
     ACCESS_TOKEN_EXPIRE_MINUTES: int
     REFRESH_TOKEN_EXPIRE_DAYS: int
+
+    GIGACHAT_TOKEN: str
     
     run: RunConfig = RunConfig()
 
