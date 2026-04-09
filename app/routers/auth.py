@@ -9,7 +9,7 @@ from app.auth.utils import create_access_token, hash_password, validate_password
 router = APIRouter(prefix="/auth", tags=["Auth"])
 
 
-@router.post("/register", status_code=201)
+@router.post("/register", status_code=201, response_model=TokenResponse)
 async def register(
     data: UserCreateDTO,
     service: UserServiceDep
@@ -17,7 +17,13 @@ async def register(
 
     user = await service.create(data)
 
-    return {"message": f"User {user.username} created"}
+    access_token = create_access_token(user.id)
+
+    return {
+        "access_token": access_token,
+    }
+
+    # return {"message": f"User {user.username} created"}
 
 
 @router.post("/login", response_model=TokenResponse)
@@ -38,4 +44,3 @@ async def login(
     return {
         "access_token": access_token,
     }
-

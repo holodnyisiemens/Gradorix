@@ -8,7 +8,7 @@ class ChallengeJuniorCreateDTO(BaseDTO):
     challenge_id: int
     junior_id: int
     assigned_by: int
-    progress: ChallengeJuniorProgress
+    progress: ChallengeJuniorProgress = ChallengeJuniorProgress.GOING
 
 
 class ChallengeJuniorReadDTO(BaseDTO):
