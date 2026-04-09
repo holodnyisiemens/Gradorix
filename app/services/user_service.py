@@ -108,6 +108,11 @@ class UserService:
         """Получить всех пользователей"""
         user_list = await self.user_repo.get_all()
         return [UserReadDTO.model_validate(user) for user in user_list]
+
+    async def get_all_by_role(self, role: str) -> list[UserReadDTO]:
+        """Получить всех пользователей с заданной ролью"""
+        user_list = await self.user_repo.get_all_by_role(role)
+        return [UserReadDTO.model_validate(user) for user in user_list]
     
     async def get_by_field(self, field_name: str, value) -> Optional[UserReadDTO]:
         """Получить первого пользователя, где поле field_name == value"""

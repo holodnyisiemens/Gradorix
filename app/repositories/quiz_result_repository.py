@@ -4,7 +4,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models.quiz_result import QuizResult
-from app.schemas.quiz_result import QuizResultCreateDTO
+from app.schemas.quiz_result import QuizResultCreateDTO, QuizResultUpdateDTO
 
 
 class QuizResultRepository:
@@ -17,6 +17,13 @@ class QuizResultRepository:
     async def create(self, data: QuizResultCreateDTO) -> QuizResult:
         qr = QuizResult(**data.model_dump())
         self.session.add(qr)
+        await self.session.flush()
+        await self.session.refresh(qr)
+        return qr
+
+    async def update(self, qr: QuizResult, data: QuizResultUpdateDTO) -> QuizResult:
+        for field, value in data.model_dump(exclude_unset=True).items():
+            setattr(qr, field, value)
         await self.session.flush()
         await self.session.refresh(qr)
         return qr

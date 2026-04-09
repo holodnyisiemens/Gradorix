@@ -1,4 +1,6 @@
-from sqlalchemy import ForeignKey, Enum as SQLEnum
+from typing import Optional
+
+from sqlalchemy import ForeignKey, Integer, String, Enum as SQLEnum, JSON
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.core.database import Base
@@ -27,3 +29,11 @@ class ChallengeJunior(Base):
         SQLEnum(ChallengeJuniorProgress, name="challenge_junior_progress"),
         nullable=False,
     )
+
+    # Junior fills in when working on the challenge
+    comment: Mapped[Optional[str]] = mapped_column(String(2000), nullable=True)
+    links: Mapped[Optional[list]] = mapped_column(JSON, nullable=True)  # list[str]
+
+    # HR fills in when reviewing
+    awarded_points: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
+    feedback: Mapped[Optional[str]] = mapped_column(String(2000), nullable=True)

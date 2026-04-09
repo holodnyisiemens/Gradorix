@@ -51,6 +51,12 @@ class UserRepository:
         result = await self.session.execute(stmt)
         return result.scalars().all()
 
+    async def get_all_by_role(self, role: str) -> list[User]:
+        """Получить всех пользователей с заданной ролью"""
+        stmt = select(User).where(User.role == role)
+        result = await self.session.execute(stmt)
+        return result.scalars().all()
+
     async def get_by_field(self, field_name: str, value) -> Optional[User]:
         """Получить первого пользователя, где поле field_name == value"""
         column = getattr(User, field_name)
