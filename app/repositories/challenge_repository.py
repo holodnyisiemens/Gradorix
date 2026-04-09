@@ -37,7 +37,10 @@ class ChallengeRepository:
 
         return challenge
 
-    async def get_all(self) -> list[Challenge]:
+    async def get_all(self, exclude_draft: bool = False) -> list[Challenge]:
         stmt = select(Challenge)
+        if exclude_draft:
+            from app.core.enums import ChallengeStatus
+            stmt = stmt.where(Challenge.status != ChallengeStatus.DRAFT)
         result = await self.session.execute(stmt)
         return result.scalars().all()

@@ -45,3 +45,8 @@ class ChallengeJuniorRepository:
             stmt = stmt.where(ChallengeJunior.assigned_by == assigned_by)
         result = await self.session.execute(stmt)
         return result.scalars().all()
+
+    async def get_all_by_challenge_id(self, challenge_id: int) -> list[ChallengeJunior]:
+        stmt = select(ChallengeJunior).where(ChallengeJunior.challenge_id == challenge_id)
+        result = await self.session.execute(stmt)
+        return result.scalars().all()

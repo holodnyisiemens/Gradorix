@@ -14,15 +14,17 @@ class ChallengeCreateDTO(BaseDTO):
     url: Optional[Annotated[AnyUrl, MaxLen(500)]] = None
     status: ChallengeStatus
     date: Optional[datetime.date] = None
+    max_points: Optional[int] = None
 
 
 class ChallengeReadDTO(BaseDTO):
     id: int
     title: str
-    description: Optional[str]
-    url: Optional[AnyUrl]
+    description: Optional[str] = None
+    url: Optional[AnyUrl] = None
     status: ChallengeStatus
     date: Optional[datetime.date] = None
+    max_points: Optional[int] = None
 
 
 class ChallengeUpdateDTO(BaseDTO):
@@ -31,3 +33,4 @@ class ChallengeUpdateDTO(BaseDTO):
     url: Optional[Annotated[AnyUrl, MaxLen(500)]] = None
     status: Optional[ChallengeStatus] = None
     date: Optional[datetime.date] = None
+    max_points: Optional[int] = None

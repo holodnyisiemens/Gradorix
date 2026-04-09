@@ -11,9 +11,12 @@ class ActivityCreateDTO(BaseDTO):
     user_id: int
     title: Annotated[str, MaxLen(255)]
     description: Annotated[str, MaxLen(1000)]
-    requested_points: int
-    activity_type: ActivityType
+    activity_type: ActivityType = ActivityType.ACHIEVEMENT
+    # HiPo doesn't set points — HR awards them during review
+    requested_points: int = 0
     status: ActivityStatus = ActivityStatus.PENDING
+    links: Optional[list[str]] = None
+    achieved_date: Optional[datetime.date] = None
 
 
 class ActivityReadDTO(BaseDTO):
@@ -28,6 +31,8 @@ class ActivityReadDTO(BaseDTO):
     submitted_at: datetime.datetime
     reviewed_at: Optional[datetime.datetime] = None
     review_note: Optional[str] = None
+    links: Optional[list[str]] = None
+    achieved_date: Optional[datetime.date] = None
 
 
 class ActivityUpdateDTO(BaseDTO):
@@ -39,3 +44,5 @@ class ActivityUpdateDTO(BaseDTO):
     activity_type: Optional[ActivityType] = None
     reviewed_at: Optional[datetime.datetime] = None
     review_note: Optional[Annotated[str, MaxLen(1000)]] = None
+    links: Optional[list[str]] = None
+    achieved_date: Optional[datetime.date] = None

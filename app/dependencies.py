@@ -62,7 +62,7 @@ def get_challenge_service(session: SessionDep) -> ChallengeService:
 
 
 def get_challenge_junior_service(session: SessionDep) -> ChallengeJuniorService:
-    return ChallengeJuniorService(ChallengeJuniorRepository(session))
+    return ChallengeJuniorService(ChallengeJuniorRepository(session), UserPointsRepository(session))
 
 
 def get_calendar_event_service(session: SessionDep) -> CalendarEventService:
@@ -98,7 +98,7 @@ def get_quiz_service(session: SessionDep) -> QuizService:
 
 
 def get_quiz_result_service(session: SessionDep) -> QuizResultService:
-    return QuizResultService(QuizResultRepository(session))
+    return QuizResultService(QuizResultRepository(session), UserPointsRepository(session))
 
 
 def get_kb_section_service(session: SessionDep) -> KBSectionService:
