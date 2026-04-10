@@ -31,7 +31,7 @@ class Settings(BaseSettings):
     ACCESS_TOKEN_EXPIRE_MINUTES: int
     REFRESH_TOKEN_EXPIRE_DAYS: int
 
-    GIGACHAT_TOKEN: str
+    GIGACHAT_TOKEN: str = ''
     
     run: RunConfig = RunConfig()
 
