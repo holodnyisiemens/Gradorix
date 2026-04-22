@@ -11,7 +11,8 @@ from app.core.enums import ChallengeStatus
 class ChallengeCreateDTO(BaseDTO):
     title: Annotated[str, MaxLen(255)]
     description: Optional[Annotated[str, MaxLen(1000)]] = None
-    url: Optional[Annotated[AnyUrl, MaxLen(500)]] = None
+    # url: Optional[Annotated[AnyUrl, MaxLen(500)]] = None
+    url: Optional[str] = None
     status: ChallengeStatus
     date: Optional[datetime.date] = None
     max_points: Optional[int] = None
