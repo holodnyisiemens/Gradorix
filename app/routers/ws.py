@@ -1,14 +1,21 @@
 import asyncio
+# from email.mime import text
 import json
 from typing import Dict, List
 
-from fastapi import APIRouter, WebSocket, WebSocketDisconnect, Query
+from fastapi import APIRouter, WebSocket, WebSocketDisconnect, Query, Depends
 from gigachat import GigaChat
 from gigachat.models import Chat, Messages, MessagesRole
 
-from app.auth.utils import decode_token
+from app.auth.utils import get_current_user
 from app.core.config import settings
 from app.ws.manager import manager
+from app.dependencies import get_session
+
+from sqlalchemy import text
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from app.ws.utils import get_db_schema, validate_sql
 
 router = APIRouter(tags=["WebSocket"])
 
@@ -233,6 +240,77 @@ SYSTEM_PROMPT = """
 """.strip()
 
 
+HR_AGENT_PROMPT = """
+Ты — SQL-агент для аналитических запросов к базе данных.
+
+Правила:
+1. Возвращай только JSON.
+2. Формируй только SELECT-запросы.
+3. Запрещены INSERT, UPDATE, DELETE, DROP, ALTER, CREATE, TRUNCATE.
+4. Используй только таблицы и поля из переданной схемы.
+5. Если запрос неоднозначен, верни need_clarification=true и задай вопрос.
+6. Если нужен список, почти всегда добавляй LIMIT.
+7. Не добавляй markdown, пояснения и кодовые блоки.
+
+Формат ответа:
+{
+  "sql": "SELECT ...",
+  "params": {...},
+  "need_clarification": false,
+  "clarification_question": ""
+}
+""".strip()
+
+async def _run_hr_agent_sync(user_text: str, history: List[Messages], db: AsyncSession) -> str:
+    db_schema = await get_db_schema()
+    messages = [
+        Messages(role=MessagesRole.SYSTEM, content=f"{HR_AGENT_PROMPT}\n{db_schema}"),
+        *history,
+        Messages(role=MessagesRole.USER, content=user_text),
+    ]
+
+    with GigaChat(
+        credentials=settings.GIGACHAT_TOKEN,
+        model="GigaChat",
+        verify_ssl_certs=False,
+    ) as client:
+        response = client.chat(Chat(messages=messages))
+        raw_answer = response.choices[0].message.content
+
+    try:
+        data = json.loads(raw_answer)
+    except Exception:
+        return "Ошибка: модель вернула не JSON"
+
+    if data.get("need_clarification"):
+        return data.get("clarification_question", "Уточните запрос")
+
+    sql = data.get("sql")
+    params = data.get("params", {})
+
+    if not sql:
+        return "Ошибка: SQL не найден в ответе модели"
+
+    validate_sql(sql)
+
+    try:
+        result = await db.execute(text(sql), params)
+        rows = result.mappings().all()
+
+        if not rows:
+            answer = "Данных не найдено"
+        else:
+            answer = json.dumps([dict(r) for r in rows], ensure_ascii=False, indent=2)
+
+    except Exception as e:
+        answer = f"Ошибка выполнения SQL: {e}"
+
+    history.append(Messages(role=MessagesRole.USER, content=user_text))
+    history.append(Messages(role=MessagesRole.ASSISTANT, content=answer))
+
+    return answer
+
+
 def _run_gigachat_sync(user_text: str, history: List[Messages]) -> str:
     messages = [
         Messages(role=MessagesRole.SYSTEM, content=SYSTEM_PROMPT),
@@ -256,6 +334,7 @@ def _run_gigachat_sync(user_text: str, history: List[Messages]) -> str:
 async def websocket_endpoint(
     ws: WebSocket,
     token: str = Query(...),
+    db: AsyncSession = Depends(get_session)
 ) -> None:
     """
     WebSocket endpoint.
@@ -274,8 +353,9 @@ async def websocket_endpoint(
       { "type": "notification", "payload": { ... } }
     """
     try:
-        payload = decode_token(token)
-        user_id = int(payload["sub"])
+        user = await get_current_user(token, db)
+        user_id = user.id
+        user_role = user.role
     except Exception:
         await ws.accept()
         await ws.close(code=4001)
@@ -322,9 +402,18 @@ async def websocket_endpoint(
                 await ws.send_json({"type": "chat_typing", "payload": {"typing": True}})
 
                 try:
-                    answer = await asyncio.to_thread(
-                        _run_gigachat_sync, user_text, _chat_histories[user_id]
-                    )
+                    if user_role == "HR":
+                        answer = await _run_hr_agent_sync(
+                            user_text,
+                            _chat_histories[user_id],
+                            db
+                        )
+                    else:
+                        answer = await asyncio.to_thread(
+                            _run_gigachat_sync,
+                            user_text,
+                            _chat_histories[user_id]
+                        )
                     await ws.send_json({
                         "type": "chat_reply",
                         "payload": {"text": answer, "done": True},
