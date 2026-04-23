@@ -48,15 +48,8 @@ async def get_db_schema() -> str:
     schema = await dump_schema(async_engine, "public")
     res["schema"] = schema
 
-    for table_name, info in schema["tables"].items():
-        for fk in info["foreign_keys"]:
-            res["relations"].append({
-                "from_table": table_name,
-                "from_columns": fk["constrained_columns"],
-                "to_schema": fk.get("referred_schema") or "public",
-                "to_table": fk["referred_table"],
-                "to_columns": fk["referred_columns"],
-            })
+    for table, data in schema["tables"].items():
+        res[table] = [col["name"] for col in data["columns"]]
 
     res["enums"] = collect_enums()
 

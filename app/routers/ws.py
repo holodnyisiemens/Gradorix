@@ -16,6 +16,7 @@ from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.ws.utils import get_db_schema, validate_sql
+from asyncpg.exceptions import UndefinedTableError
 
 router = APIRouter(tags=["WebSocket"])
 
@@ -244,13 +245,14 @@ HR_AGENT_PROMPT = """
 Ты — SQL-агент для аналитических запросов к базе данных.
 
 Правила:
-1. Возвращай данные в человекочитаемом формате.
+1. Возвращай данные в JSON формате.
 2. Формируй только SELECT-запросы.
 3. Запрещены INSERT, UPDATE, DELETE, DROP, ALTER, CREATE, TRUNCATE.
 4. Используй только таблицы и поля из переданной схемы, строго запрещается добавлять в запросы несуществующие поля/таблицы.
-5. Если запрос неоднозначен, задай вопрос, то же относится и к запросам, в которых не указано какую информацию/действие с базой данных необходимо совершить.
-6. Если нужен список, почти всегда добавляй LIMIT.
-7. Не добавляй markdown, пояснения и кодовые блоки.
+5. Если в запросе есть поля/таблицы/отношения, которых нет в существующей схеме (tables - таблицы, columns - столбцы, поля в них), то не формируй sql запрос, а напиши какие конкретно данные отсутствуют.
+6. Если запрос неоднозначен, задай вопрос, то же относится и к запросам, в которых не указано какую информацию/действие с базой данных необходимо совершить.
+7. Если нужен список, почти всегда добавляй LIMIT.
+8. Не добавляй markdown, пояснения и кодовые блоки.
 
 Формат ответа (в случае сформированного запроса к базе данных):
 {
@@ -259,6 +261,15 @@ HR_AGENT_PROMPT = """
   "need_clarification": false,
   "clarification_question": ""
 }
+
+Если таблица или поле отсутствует в схеме:
+- НЕ генерируй SQL
+- верни текст с ошибкой
+
+Перед генерацией SQL:
+1. Проверь все таблицы
+2. Проверь все поля
+3. Если хотя бы одно отсутствует — остановись
 """.strip()
 
 async def _run_hr_agent_sync(user_text: str, history: List[Messages], db: AsyncSession) -> str:
@@ -308,8 +319,8 @@ async def _run_hr_agent_sync(user_text: str, history: List[Messages], db: AsyncS
         else:
             answer = json.dumps([dict(r) for r in rows], ensure_ascii=False, indent=2)
 
-    except Exception as e:
-        answer = f"Ошибка выполнения SQL: {e}"
+    except UndefinedTableError as undefined_table_error:
+        answer = f"Ошибка выполнения SQL: {undefined_table_error.sqlstate}"
 
     history.append(Messages(role=MessagesRole.USER, content=user_text))
     history.append(Messages(role=MessagesRole.ASSISTANT, content=answer))
@@ -429,9 +440,10 @@ async def websocket_endpoint(
                         "type": "error",
                         "payload": {
                             "code": "CHAT_ERROR",
-                            "message": f"GigaChat error: {exc}",
+                            "message": f"Ошибка при обработке запроса: {exc.__context__.__cause__}",
                         },
                     })
+
 
     except WebSocketDisconnect:
         pass
