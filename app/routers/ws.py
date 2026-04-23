@@ -244,15 +244,15 @@ HR_AGENT_PROMPT = """
 Ты — SQL-агент для аналитических запросов к базе данных.
 
 Правила:
-1. Возвращай только JSON.
+1. Возвращай данные в человекочитаемом формате.
 2. Формируй только SELECT-запросы.
 3. Запрещены INSERT, UPDATE, DELETE, DROP, ALTER, CREATE, TRUNCATE.
-4. Используй только таблицы и поля из переданной схемы.
-5. Если запрос неоднозначен, верни need_clarification=true и задай вопрос.
+4. Используй только таблицы и поля из переданной схемы, строго запрещается добавлять в запросы несуществующие поля/таблицы.
+5. Если запрос неоднозначен, задай вопрос, то же относится и к запросам, в которых не указано какую информацию/действие с базой данных необходимо совершить.
 6. Если нужен список, почти всегда добавляй LIMIT.
 7. Не добавляй markdown, пояснения и кодовые блоки.
 
-Формат ответа:
+Формат ответа (в случае сформированного запроса к базе данных):
 {
   "sql": "SELECT ...",
   "params": {...},
@@ -280,7 +280,10 @@ async def _run_hr_agent_sync(user_text: str, history: List[Messages], db: AsyncS
     try:
         data = json.loads(raw_answer)
     except Exception:
-        return "Ошибка: модель вернула не JSON"
+        answer = raw_answer
+        history.append(Messages(role=MessagesRole.USER, content=user_text))
+        history.append(Messages(role=MessagesRole.ASSISTANT, content=answer))
+        return answer
 
     if data.get("need_clarification"):
         return data.get("clarification_question", "Уточните запрос")
@@ -289,7 +292,10 @@ async def _run_hr_agent_sync(user_text: str, history: List[Messages], db: AsyncS
     params = data.get("params", {})
 
     if not sql:
-        return "Ошибка: SQL не найден в ответе модели"
+        answer = "Ошибка: SQL не найден в ответе модели"
+        history.append(Messages(role=MessagesRole.USER, content=user_text))
+        history.append(Messages(role=MessagesRole.ASSISTANT, content=answer))
+        return answer
 
     validate_sql(sql)
 

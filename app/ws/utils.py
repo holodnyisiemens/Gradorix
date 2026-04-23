@@ -15,7 +15,6 @@ def collect_enums() -> dict:
         if isinstance(obj, type) and issubclass(obj, Enum):
             enums_dict[name] = [e.value for e in obj]
 
-    print(enums_dict)
     return enums_dict
 
 
