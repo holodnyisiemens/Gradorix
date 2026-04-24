@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 
 from app.auth.utils import get_current_user, require_roles
 from app.core.enums import UserRole
-from app.dependencies import NotificationServiceDep
+from app.dependencies import NotificationServiceDep, PushServiceDep
 from app.models.user import User
 from app.schemas.notification import NotificationCreateDTO, NotificationReadDTO, NotificationUpdateDTO
 from app.ws.notify import push_ws_only
@@ -40,10 +40,12 @@ async def get_by_id(
 async def create(
     data: NotificationCreateDTO,
     service: NotificationServiceDep,
+    push_service: PushServiceDep,
     _: User = Depends(require_roles(UserRole.HR, UserRole.MENTOR)),
 ):
     notification = await service.create(data)
     await push_ws_only(notification)
+    await push_service.send(notification)
     return notification
 
 

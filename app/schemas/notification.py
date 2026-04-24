@@ -8,6 +8,7 @@ from app.schemas.base import BaseDTO
 class NotificationCreateDTO(BaseDTO):
     user_id: int
     message: Annotated[str, MaxLen(1000)]
+    link: Optional[str] = None
     is_read: bool = False
 
 
@@ -15,6 +16,7 @@ class NotificationReadDTO(BaseDTO):
     id: int
     user_id: int
     message: str
+    link: Optional[str] = None
     is_read: bool
     created_at: Optional[datetime.datetime] = None
 
@@ -22,4 +24,5 @@ class NotificationReadDTO(BaseDTO):
 class NotificationUpdateDTO(BaseDTO):
     user_id: Optional[int] = None
     message: Optional[Annotated[str, MaxLen(1000)]] = None
+    link: Optional[str] = None
     is_read: Optional[bool] = None

@@ -32,7 +32,11 @@ class Settings(BaseSettings):
     REFRESH_TOKEN_EXPIRE_DAYS: int
 
     GIGACHAT_TOKEN: str = ''
-    
+
+    VAPID_PRIVATE_KEY: str = ''
+    VAPID_PUBLIC_KEY: str = ''
+    VAPID_SUBSCRIBER: str = 'admin@gradorix.ru'
+
     run: RunConfig = RunConfig()
 
     @property

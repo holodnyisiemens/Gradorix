@@ -19,6 +19,7 @@ from app.repositories.quiz_repository import QuizRepository
 from app.repositories.quiz_result_repository import QuizResultRepository
 from app.repositories.kb_repository import KBSectionRepository, KBArticleRepository
 from app.repositories.meeting_attendance_repository import MeetingAttendanceRepository
+from app.repositories.push_subscription_repository import PushSubscriptionRepository
 
 from app.services.challenge_junior_service import ChallengeJuniorService
 from app.services.challenge_service import ChallengeService
@@ -35,6 +36,7 @@ from app.services.quiz_service import QuizService
 from app.services.quiz_result_service import QuizResultService
 from app.services.kb_service import KBSectionService, KBArticleService
 from app.services.meeting_attendance_service import MeetingAttendanceService
+from app.services.push_service import PushService
 
 
 async def get_session() -> AsyncSession:
@@ -113,6 +115,10 @@ def get_meeting_attendance_service(session: SessionDep) -> MeetingAttendanceServ
     return MeetingAttendanceService(MeetingAttendanceRepository(session))
 
 
+def get_push_service(session: SessionDep) -> PushService:
+    return PushService(PushSubscriptionRepository(session))
+
+
 UserServiceDep = Annotated[UserService, Depends(get_user_service)]
 MentorJuniorServiceDep = Annotated[MentorJuniorService, Depends(get_mentor_junior_service)]
 NotificationServiceDep = Annotated[NotificationService, Depends(get_notification_service)]
@@ -129,3 +135,4 @@ QuizResultServiceDep = Annotated[QuizResultService, Depends(get_quiz_result_serv
 KBSectionServiceDep = Annotated[KBSectionService, Depends(get_kb_section_service)]
 KBArticleServiceDep = Annotated[KBArticleService, Depends(get_kb_article_service)]
 MeetingAttendanceServiceDep = Annotated[MeetingAttendanceService, Depends(get_meeting_attendance_service)]
+PushServiceDep = Annotated[PushService, Depends(get_push_service)]

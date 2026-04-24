@@ -5,7 +5,7 @@ from starlette import status as http_status
 
 from app.auth.utils import get_current_user, require_roles
 from app.core.enums import ChallengeJuniorProgress, ChallengeStatus, UserRole
-from app.dependencies import ChallengeJuniorServiceDep, ChallengeServiceDep, NotificationServiceDep
+from app.dependencies import ChallengeJuniorServiceDep, ChallengeServiceDep, NotificationServiceDep, PushServiceDep
 from app.models.user import User
 from app.schemas.challenge_junior import ChallengeJuniorCreateDTO, ChallengeJuniorReadDTO, ChallengeJuniorUpdateDTO
 from app.ws.notify import push_notification
@@ -39,6 +39,7 @@ async def create(
     service: ChallengeJuniorServiceDep,
     challenge_service: ChallengeServiceDep,
     notification_service: NotificationServiceDep,
+    push_service: PushServiceDep,
     _: User = Depends(require_roles(UserRole.HR, UserRole.MENTOR)),
 ):
     result = await service.create(data)
@@ -49,6 +50,8 @@ async def create(
             data.junior_id,
             f"🎯 Вам назначена задача «{challenge.title}»",
             notification_service,
+            push_service=push_service,
+            link=f"/challenges/{data.challenge_id}",
         )
     except Exception:
         pass
@@ -64,6 +67,7 @@ async def update(
     service: ChallengeJuniorServiceDep,
     challenge_service: ChallengeServiceDep,
     notification_service: NotificationServiceDep,
+    push_service: PushServiceDep,
     current_user: User = Depends(get_current_user),
 ):
     # JUNIOR can only update their own assignment
@@ -84,13 +88,19 @@ async def update(
 
     result = await service.update(challenge_id, junior_id, data)
 
-    # Notify HR when task is marked DONE
+    # Notify assigned_by when junior marks task DONE
     if data.progress == ChallengeJuniorProgress.DONE:
         try:
+            junior_name = (
+                f"{current_user.firstname} {current_user.lastname}".strip()
+                or current_user.username
+            )
             await push_notification(
                 result.assigned_by,
-                f"✅ HiPo выполнил задачу «{challenge.title}»",
+                f"📋 {junior_name} отправил задачу «{challenge.title}» на проверку",
                 notification_service,
+                push_service=push_service,
+                link="/points",
             )
         except Exception:
             pass
