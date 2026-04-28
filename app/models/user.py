@@ -19,8 +19,8 @@ class User(Base):
 
     role: Mapped[UserRole] = mapped_column(SQLEnum(UserRole, name="user_role"), nullable=False)
 
-    firstname: Mapped[Optional[str]] = mapped_column(String(30), nullable=True)
-    lastname: Mapped[Optional[str]] = mapped_column(String(30), nullable=True)
+    # firstname: Mapped[Optional[str]] = mapped_column(String(30), nullable=True)
+    # lastname: Mapped[Optional[str]] = mapped_column(String(30), nullable=True)
     
     is_active: Mapped[bool] = mapped_column(
         Boolean, nullable=False, default=True, server_default="true",
