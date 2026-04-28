@@ -3,6 +3,7 @@ from jose import jwt, JWTError
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy.ext.asyncio import AsyncSession
+import secrets
 
 from app.core.config import settings
 from app.core.enums import UserRole
@@ -20,6 +21,33 @@ def create_access_token(user_id: int) -> str:
         "exp": datetime.utcnow() + timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES),
     }
     return jwt.encode(payload, settings.SECRET_KEY, algorithm=settings.HASH_ALGORITHM)
+
+
+def create_refresh_token() -> str:
+    """Генерирует refresh токен"""
+    return secrets.token_urlsafe(32)
+
+
+async def store_refresh_token(user_id: int, token: str, db: AsyncSession) -> None:
+    """Сохраняет refresh токен в БД"""
+    from app.repositories.token_repository import TokenRepository
+    repo = TokenRepository(db)
+    await repo.create(user_id, token)
+
+
+async def verify_refresh_token(token: str, db: AsyncSession) -> int:
+    """Проверяет refresh токен и возвращает user_id"""
+    from app.repositories.token_repository import TokenRepository
+    repo = TokenRepository(db)
+    
+    refresh_token = await repo.get_by_token(token)
+    if not refresh_token:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Invalid refresh token"
+        )
+    
+    return refresh_token.user_id
 
 
 def decode_token(token: str) -> dict:

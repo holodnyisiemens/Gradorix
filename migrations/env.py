@@ -25,6 +25,7 @@ from app.models.kb_section import KBSection  # noqa
 from app.models.kb_article import KBArticle  # noqa
 from app.models.meeting_attendance import MeetingAttendance  # noqa
 from app.models.push_subscription import PushSubscription  # noqa
+from app.models.refresh_token import RefreshToken
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
