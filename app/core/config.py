@@ -31,6 +31,9 @@ class Settings(BaseSettings):
     ACCESS_TOKEN_EXPIRE_MINUTES: int
     REFRESH_TOKEN_EXPIRE_DAYS: int
 
+    ADMIN_USERNAME: str
+    ADMIN_PASSWORD: str
+
     GIGACHAT_TOKEN: str = ''
 
     VAPID_PRIVATE_KEY: str = ''
