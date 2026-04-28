@@ -13,9 +13,9 @@ class User(Base):
     id: Mapped[int] = mapped_column(primary_key=True)
 
     username: Mapped[str] = mapped_column(String(30), nullable=False, unique=True)
-    email: Mapped[str] = mapped_column(String(255), nullable=False, unique=True)
+    # email: Mapped[str] = mapped_column(String(255), nullable=False, unique=True)
 
-    password_hash: Mapped[str] = mapped_column(LargeBinary, nullable=False)
+    password_hash: Mapped[bytes] = mapped_column(LargeBinary, nullable=False)
 
     role: Mapped[UserRole] = mapped_column(SQLEnum(UserRole, name="user_role"), nullable=False)
 
@@ -27,4 +27,4 @@ class User(Base):
     )
 
     def __str__(self) -> str:
-        return f"{self.username} ({self.email})"
+        return f"{self.username}"

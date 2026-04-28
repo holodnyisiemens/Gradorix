@@ -1,6 +1,11 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+from sqladmin import Admin
+from app.core.database import async_engine
+from app.admin.auth import AdminAuth
+from app.admin.admin import register_all_models
+
 from app.core.config import settings
 from app.routers import (
     users,
@@ -24,6 +29,10 @@ from app.routers import (
 )
 
 app = FastAPI(title="Gradorix")
+
+admin = Admin(app, async_engine, authentication_backend=AdminAuth(secret_key="очень-секретный-ключ"), title="Admin Panel", base_url="/admin")
+
+register_all_models(admin)
 
 app.add_middleware(
     CORSMiddleware,

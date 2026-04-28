@@ -19,7 +19,9 @@ dependencies = [
     "passlib[bcrypt] (>=1.7.4,<2.0.0)",
     "python-jose (>=3.5.0,<4.0.0)",
     "gigachat (>=0.2.0,<0.3.0) ; python_version >= \"3.12\" and python_version < \"4.0\"",
-    "pywebpush (>=2.0.0)"
+    "pywebpush (>=2.0.0)",
+    "sqladmin (>=0.25.0,<0.26.0)",
+    "itsdangerous (>=2.2.0,<3.0.0)"
 ]
 
 
