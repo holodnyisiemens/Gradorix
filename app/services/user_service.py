@@ -40,7 +40,7 @@ class UserService:
     async def create(self, user_data: UserCreateDTO) -> UserReadDTO:
         """Создать пользователя"""
         await self._check_unique("username", user_data.username)
-        await self._check_unique("email", user_data.email)
+        # await self._check_unique("email", user_data.email)
 
         try:
             user = await self.user_repo.create(user_data)
@@ -49,7 +49,7 @@ class UserService:
             await self.user_repo.session.rollback()
             raise HTTPException(
                 status_code=status.HTTP_409_CONFLICT,
-                detail="Username or email already exists",
+                detail="Username already exists",
             )
         except SQLAlchemyError:
             await self.user_repo.session.rollback()
@@ -83,8 +83,8 @@ class UserService:
         if user_data.username is not None:
             await self._check_unique("username", user_data.username, user_id)
 
-        if user_data.email is not None:
-            await self._check_unique("email", user_data.email, user_id)
+        # if user_data.email is not None:
+        #     await self._check_unique("email", user_data.email, user_id)
 
         try:
             await self.user_repo.update(user, user_data)
@@ -93,7 +93,7 @@ class UserService:
             await self.user_repo.session.rollback()
             raise HTTPException(
                 status_code=status.HTTP_409_CONFLICT,
-                detail="Username or email already exists",
+                detail="Username already exists",
             )
         except SQLAlchemyError:
             await self.user_repo.session.rollback()
@@ -121,9 +121,9 @@ class UserService:
             return UserReadDTO.model_validate(user)
         return None
     
-    async def get_by_email(self, value: str) -> Optional[UserLoginReadDTO]:
-        """Получить пользователя по email"""
-        user = await self.user_repo.get_by_field("email", value)
+    async def get_by_username(self, value: str) -> Optional[UserLoginReadDTO]:
+        """Получить пользователя по username"""
+        user = await self.user_repo.get_by_field("username", value)
         if user:
             return UserLoginReadDTO.model_validate(user)
         return None

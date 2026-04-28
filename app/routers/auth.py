@@ -41,7 +41,7 @@ async def login(
     service: UserServiceDep,
     db: AsyncSession = Depends(get_session)
 ):
-    user = await service.get_by_email(data.email)
+    user = await service.get_by_username(data.username)
 
     if not user:
         raise HTTPException(401, "Invalid credentials")
