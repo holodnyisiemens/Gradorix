@@ -12,7 +12,7 @@ from app.models.challenge_junior import ChallengeJunior  # noqa
 from app.models.mentor_junior import MentorJunior  # noqa
 from app.models.notification import Notification  # noqa
 from app.models.user import User  # noqa
-from app.models.calendar_event import CalendarEvent  # noqa
+from app.models.calendar_event import CalendarEvent, CalendarEventAttendee  # noqa
 from app.models.achievement import Achievement  # noqa
 from app.models.user_achievement import UserAchievement  # noqa
 from app.models.user_points import UserPoints  # noqa

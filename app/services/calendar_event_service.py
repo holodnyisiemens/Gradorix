@@ -11,6 +11,21 @@ from app.schemas.calendar_event import CalendarEventCreateDTO, CalendarEventRead
 from app.core.enums import CalendarEventType
 
 
+def _to_dto(event: CalendarEvent) -> CalendarEventReadDTO:
+    return CalendarEventReadDTO(
+        id=event.id,
+        title=event.title,
+        date=event.date,
+        event_type=event.event_type,
+        challenge_id=event.challenge_id,
+        description=event.description,
+        start_time=event.start_time,
+        end_time=event.end_time,
+        attendee_ids=[a.user_id for a in event.attendees],
+        created_by=event.created_by,
+    )
+
+
 class CalendarEventService:
     def __init__(self, repo: CalendarEventRepository):
         self.repo = repo
@@ -22,7 +37,7 @@ class CalendarEventService:
         return event
 
     async def get_by_id(self, event_id: int) -> CalendarEventReadDTO:
-        return CalendarEventReadDTO.model_validate(await self._get_or_404(event_id))
+        return _to_dto(await self._get_or_404(event_id))
 
     async def get_all(
         self,
@@ -30,7 +45,7 @@ class CalendarEventService:
         event_type: Optional[CalendarEventType] = None,
     ) -> list[CalendarEventReadDTO]:
         events = await self.repo.get_all(date=date, event_type=event_type)
-        return [CalendarEventReadDTO.model_validate(e) for e in events]
+        return [_to_dto(e) for e in events]
 
     async def create(self, data: CalendarEventCreateDTO) -> CalendarEventReadDTO:
         try:
@@ -38,11 +53,11 @@ class CalendarEventService:
             await self.repo.session.commit()
         except IntegrityError:
             await self.repo.session.rollback()
-            raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Referenced challenge not found")
+            raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail="Referenced entity not found")
         except SQLAlchemyError:
             await self.repo.session.rollback()
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="CalendarEvent creation error")
-        return CalendarEventReadDTO.model_validate(event)
+        return _to_dto(event)
 
     async def update(self, event_id: int, data: CalendarEventUpdateDTO) -> CalendarEventReadDTO:
         event = await self._get_or_404(event_id)
@@ -52,7 +67,7 @@ class CalendarEventService:
         except SQLAlchemyError:
             await self.repo.session.rollback()
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="CalendarEvent update error")
-        return CalendarEventReadDTO.model_validate(event)
+        return _to_dto(event)
 
     async def delete(self, event_id: int) -> None:
         event = await self._get_or_404(event_id)

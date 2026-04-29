@@ -1,5 +1,5 @@
 import datetime
-from typing import Annotated, Optional
+from typing import Annotated, List, Optional
 
 from annotated_types import MaxLen
 
@@ -13,6 +13,10 @@ class CalendarEventCreateDTO(BaseDTO):
     event_type: CalendarEventType
     challenge_id: Optional[int] = None
     description: Optional[str] = None
+    start_time: Optional[datetime.time] = None
+    end_time: Optional[datetime.time] = None
+    attendee_ids: List[int] = []
+    created_by: Optional[int] = None
 
 
 class CalendarEventReadDTO(BaseDTO):
@@ -22,6 +26,10 @@ class CalendarEventReadDTO(BaseDTO):
     event_type: CalendarEventType
     challenge_id: Optional[int] = None
     description: Optional[str] = None
+    start_time: Optional[datetime.time] = None
+    end_time: Optional[datetime.time] = None
+    attendee_ids: List[int] = []
+    created_by: Optional[int] = None
 
 
 class CalendarEventUpdateDTO(BaseDTO):
@@ -30,3 +38,6 @@ class CalendarEventUpdateDTO(BaseDTO):
     event_type: Optional[CalendarEventType] = None
     challenge_id: Optional[int] = None
     description: Optional[str] = None
+    start_time: Optional[datetime.time] = None
+    end_time: Optional[datetime.time] = None
+    attendee_ids: Optional[List[int]] = None
