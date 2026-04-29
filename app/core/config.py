@@ -40,6 +40,11 @@ class Settings(BaseSettings):
     VAPID_PUBLIC_KEY: str = ''
     VAPID_SUBSCRIBER: str = 'admin@gradorix.ru'
 
+    MINIO_ENDPOINT: str = "minio:9000"
+    MINIO_ACCESS_KEY: str = "admin"
+    MINIO_SECRET_KEY: str = "supersecret"
+    MINIO_BUCKET: str = "uploads"
+
     run: RunConfig = RunConfig()
 
     @property

@@ -27,6 +27,7 @@ from app.routers import (
     ws,
     push,
 )
+from app.minio.init_minio import init_bucket
 
 app = FastAPI(title="Gradorix")
 
@@ -60,6 +61,12 @@ app.include_router(meeting_attendance.router)
 app.include_router(auth.router)
 app.include_router(ws.router)
 app.include_router(push.router)
+
+
+@app.on_event("startup")
+def startup():
+    init_bucket()
+
 
 if __name__ == "__main__":
     import uvicorn

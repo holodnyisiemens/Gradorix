@@ -49,8 +49,10 @@ class KBArticleRepository:
     async def get_by_id(self, article_id: int) -> Optional[KBArticle]:
         return await self.session.get(KBArticle, article_id)
 
-    async def create(self, data: KBArticleCreateDTO) -> KBArticle:
-        article = KBArticle(**data.model_dump())
+    async def create(self, data: KBArticleCreateDTO, attachments: Optional[list[str]] = None) -> KBArticle:
+        article_data = data.model_dump()
+        article_data['attachments'] = attachments or []
+        article = KBArticle(**article_data)
         self.session.add(article)
         await self.session.flush()
         await self.session.refresh(article)
@@ -60,9 +62,11 @@ class KBArticleRepository:
         await self.session.delete(article)
         await self.session.flush()
 
-    async def update(self, article: KBArticle, data: KBArticleUpdateDTO) -> KBArticle:
+    async def update(self, article: KBArticle, data: KBArticleUpdateDTO, attachments: Optional[list[str]] = None) -> KBArticle:
         for field, value in data.model_dump(exclude_unset=True).items():
             setattr(article, field, value)
+        if attachments is not None:
+            article.attachments = attachments
         await self.session.flush()
         await self.session.refresh(article)
         return article

@@ -1,6 +1,7 @@
 import datetime
+from typing import Optional
 
-from sqlalchemy import Date, ForeignKey, String, Text
+from sqlalchemy import Date, ForeignKey, String, Text, JSON
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.core.database import Base
@@ -23,3 +24,5 @@ class KBArticle(Base):
     created_at: Mapped[datetime.date] = mapped_column(Date, nullable=False)
 
     author: Mapped[str] = mapped_column(String(100), nullable=False)
+
+    attachments: Mapped[Optional[list]] = mapped_column(JSON, nullable=True, default=list, server_default="[]")
