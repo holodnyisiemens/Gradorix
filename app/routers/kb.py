@@ -2,6 +2,7 @@ from typing import Optional
 import io
 import mimetypes
 from datetime import datetime
+from urllib.parse import quote
 
 from fastapi import APIRouter, File, UploadFile, Depends, Form
 from starlette.responses import StreamingResponse
@@ -134,20 +135,29 @@ async def download_attachment(
 ):
     """Скачивает прикрепленный файл из MinIO"""
     try:
-        # Получаем объект из MinIO
-        response = minio_client.get_object(settings.MINIO_BUCKET, f"kb-articles/{file_path}")
+        object_key = file_path.lstrip("/")
+        if not object_key.startswith("kb-articles/"):
+            object_key = f"kb-articles/{object_key}"
+
+        response = minio_client.get_object(settings.MINIO_BUCKET, object_key)
         
-        # Читаем содержимое файла
         file_content = response.read()
         
-        # Определяем MIME тип на основе расширения
         mime_type, _ = mimetypes.guess_type(file_path)
         mime_type = mime_type or "application/octet-stream"
+        filename = file_path.split("/")[-1]
+        safe_ascii_filename = filename.encode("ascii", "ignore").decode("ascii") or "attachment"
+        encoded_filename = quote(filename)
         
         return StreamingResponse(
             io.BytesIO(file_content),
             media_type=mime_type,
-            headers={"Content-Disposition": f"attachment; filename={file_path.split('/')[-1]}"}
+            headers={
+                "Content-Disposition": (
+                    f'attachment; filename="{safe_ascii_filename}"; '
+                    f"filename*=UTF-8''{encoded_filename}"
+                )
+            }
         )
     except Exception as e:
         raise HTTPException(
