@@ -1,28 +1,28 @@
 import pytest
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.core.enums import UserRole, ChallengeJuniorProgress
-from app.repositories.challenge_junior_repository import ChallengeJuniorRepository
-from app.repositories.mentor_junior_repository import MentorJuniorRepository
-from app.schemas.challenge_junior import ChallengeJuniorCreateDTO
-from app.schemas.mentor_junior import MentorJuniorCreateDTO
+from app.core.enums import UserRole, ChallengeEmployeeProgress
+from app.repositories.challenge_employee_repository import ChallengeEmployeeRepository
+from app.repositories.mentor_employee_repository import MentorEmployeeRepository
+from app.schemas.challenge_employee import ChallengeEmployeeCreateDTO
+from app.schemas.mentor_employee import MentorEmployeeCreateDTO
 from app.schemas.user import UserCreateDTO
-from app.services.challenge_junior_service import ChallengeJuniorService
+from app.services.challenge_employee_service import ChallengeEmployeeService
 from app.services.challenge_service import ChallengeService
-from app.services.mentor_junior_service import MentorJuniorService
+from app.services.mentor_employee_service import MentorEmployeeService
 from app.services.mentor_service import MentorService
 from app.services.notification_service import NotificationService
 from app.services.user_service import UserService
 
 
 @pytest.fixture
-def mentor_junior_repository(session: AsyncSession) -> MentorJuniorRepository:
-    return MentorJuniorRepository(session)
+def mentor_employee_repository(session: AsyncSession) -> MentorEmployeeRepository:
+    return MentorEmployeeRepository(session)
 
 
 @pytest.fixture
-def challenge_junior_repository(session: AsyncSession) -> ChallengeJuniorRepository:
-    return ChallengeJuniorRepository(session)
+def challenge_employee_repository(session: AsyncSession) -> ChallengeEmployeeRepository:
+    return ChallengeEmployeeRepository(session)
 
 
 @pytest.fixture
@@ -36,8 +36,8 @@ def mentor_service(user_repository) -> MentorService:
 
 
 @pytest.fixture
-def mentor_junior_service(mentor_junior_repository) -> MentorJuniorService:
-    return MentorJuniorService(mentor_junior_repository)
+def mentor_employee_service(mentor_employee_repository) -> MentorEmployeeService:
+    return MentorEmployeeService(mentor_employee_repository)
 
 
 @pytest.fixture
@@ -51,35 +51,23 @@ def challenge_service(challenge_repository) -> ChallengeService:
 
 
 @pytest.fixture
-def challenge_junior_service(challenge_junior_repository) -> ChallengeJuniorService:
-    return ChallengeJuniorService(challenge_junior_repository)
+def challenge_employee_service(challenge_employee_repository) -> ChallengeEmployeeService:
+    return ChallengeEmployeeService(challenge_employee_repository, None)
 
 
 @pytest.fixture
 def mentor_users() -> list[UserCreateDTO]:
     return [
-        UserCreateDTO(
-            username="mentor1",
-            email="mentor1@example.com",
-            password="123456",
-            role=UserRole.MENTOR,
-        ),
-        UserCreateDTO(
-            username="mentor2",
-            email="mentor2@example.com",
-            password="123456",
-            role=UserRole.MENTOR,
-        ),
+        UserCreateDTO(username="mentor1", password="123456", role=UserRole.MENTOR),
+        UserCreateDTO(username="mentor2", password="123456", role=UserRole.MENTOR),
     ]
 
 
 @pytest.fixture
-def mentor_junior_data() -> list[MentorJuniorCreateDTO]:
-    """IDs подставляются в тестах после создания пользователей"""
+def mentor_employee_data() -> list[MentorEmployeeCreateDTO]:
     return []
 
 
 @pytest.fixture
-def challenge_junior_data() -> list[ChallengeJuniorCreateDTO]:
-    """IDs подставляются в тестах после создания сущностей"""
+def challenge_employee_data() -> list[ChallengeEmployeeCreateDTO]:
     return []

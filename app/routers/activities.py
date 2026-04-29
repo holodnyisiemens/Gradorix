@@ -20,7 +20,7 @@ async def get_all(
     current_user: User = Depends(get_current_user),
 ):
     # JUNIOR sees only their own activities
-    if current_user.role == UserRole.JUNIOR:
+    if current_user.role == UserRole.EMPLOYEE:
         user_id = current_user.id
     return await service.get_all(user_id=user_id, activity_status=activity_status)
 
@@ -32,7 +32,7 @@ async def get_by_id(
     current_user: User = Depends(get_current_user),
 ):
     activity = await service.get_by_id(activity_id)
-    if current_user.role == UserRole.JUNIOR and activity.user_id != current_user.id:
+    if current_user.role == UserRole.EMPLOYEE and activity.user_id != current_user.id:
         raise HTTPException(status_code=http_status.HTTP_403_FORBIDDEN, detail="Forbidden")
     return activity
 
@@ -44,7 +44,7 @@ async def create(
     current_user: User = Depends(get_current_user),
 ):
     # JUNIOR can only submit for themselves
-    if current_user.role == UserRole.JUNIOR:
+    if current_user.role == UserRole.EMPLOYEE:
         data = data.model_copy(update={"user_id": current_user.id, "requested_points": 0})
     return await service.create(data)
 
@@ -58,7 +58,7 @@ async def update(
 ):
     activity = await service.get_by_id(activity_id)
 
-    if current_user.role == UserRole.JUNIOR:
+    if current_user.role == UserRole.EMPLOYEE:
         # JUNIOR can only edit their own pending activities (title, description, links, achieved_date)
         if activity.user_id != current_user.id:
             raise HTTPException(status_code=http_status.HTTP_403_FORBIDDEN, detail="Forbidden")
@@ -80,6 +80,6 @@ async def delete(
     current_user: User = Depends(get_current_user),
 ):
     activity = await service.get_by_id(activity_id)
-    if current_user.role == UserRole.JUNIOR and activity.user_id != current_user.id:
+    if current_user.role == UserRole.EMPLOYEE and activity.user_id != current_user.id:
         raise HTTPException(status_code=http_status.HTTP_403_FORBIDDEN, detail="Forbidden")
     await service.delete(activity_id)

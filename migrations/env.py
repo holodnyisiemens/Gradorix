@@ -8,8 +8,8 @@ from alembic import context
 from app.core.config import settings
 from app.core.database import Base
 from app.models.challenge import Challenge  # noqa
-from app.models.challenge_junior import ChallengeJunior  # noqa
-from app.models.mentor_junior import MentorJunior  # noqa
+from app.models.challenge_employee import ChallengeEmployee  # noqa
+from app.models.mentor_employee import MentorEmployee  # noqa
 from app.models.notification import Notification  # noqa
 from app.models.user import User  # noqa
 from app.models.calendar_event import CalendarEvent, CalendarEventAttendee  # noqa

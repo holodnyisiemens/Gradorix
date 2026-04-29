@@ -1,32 +1,30 @@
 from typing import Optional
 
 from app.schemas.base import BaseDTO
-from app.core.enums import ChallengeJuniorProgress
+from app.core.enums import ChallengeEmployeeProgress
 
 
-class ChallengeJuniorCreateDTO(BaseDTO):
+class ChallengeEmployeeCreateDTO(BaseDTO):
     challenge_id: int
-    junior_id: int
+    employee_id: int
     assigned_by: int
-    progress: ChallengeJuniorProgress = ChallengeJuniorProgress.GOING
+    progress: ChallengeEmployeeProgress = ChallengeEmployeeProgress.GOING
 
 
-class ChallengeJuniorReadDTO(BaseDTO):
+class ChallengeEmployeeReadDTO(BaseDTO):
     challenge_id: int
-    junior_id: int
+    employee_id: int
     assigned_by: int
-    progress: ChallengeJuniorProgress
+    progress: ChallengeEmployeeProgress
     comment: Optional[str] = None
     links: Optional[list[str]] = None
     awarded_points: Optional[int] = None
     feedback: Optional[str] = None
 
 
-class ChallengeJuniorUpdateDTO(BaseDTO):
-    progress: Optional[ChallengeJuniorProgress] = None
-    # Fields junior can fill in
+class ChallengeEmployeeUpdateDTO(BaseDTO):
+    progress: Optional[ChallengeEmployeeProgress] = None
     comment: Optional[str] = None
     links: Optional[list[str]] = None
-    # Fields HR fills in
     awarded_points: Optional[int] = None
     feedback: Optional[str] = None

@@ -69,15 +69,13 @@ def users() -> list[UserCreateDTO]:
     users = [
         UserCreateDTO(
             username="alexey",
-            email="alexey@example.com",
             password="123456",
             role=UserRole.HR,
         ),
         UserCreateDTO(
             username="alexander",
-            email="alexander@example.com",
             password="123456",
-            role=UserRole.JUNIOR,
+            role=UserRole.EMPLOYEE,
         ),
     ]
     return users

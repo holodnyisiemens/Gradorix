@@ -55,7 +55,7 @@ class ChallengeService:
         self,
         challenge_id: int,
         data: ChallengeUpdateDTO,
-        challenge_junior_service=None,  # injected from router for status side-effects
+        challenge_employee_service=None,  # injected from router for status side-effects
     ) -> ChallengeReadDTO:
         challenge = await self._get_or_404(challenge_id)
         old_status = challenge.status
@@ -64,13 +64,13 @@ class ChallengeService:
             challenge = await self.challenge_repo.update(challenge, data)
 
             # Side-effects on status transitions
-            if data.status and data.status != old_status and challenge_junior_service:
+            if data.status and data.status != old_status and challenge_employee_service:
                 if data.status == ChallengeStatus.CANCELLED:
                     # Rollback all awarded points and clear them
-                    await challenge_junior_service.rollback_points_for_challenge(challenge_id)
+                    await challenge_employee_service.rollback_points_for_challenge(challenge_id)
                 elif data.status == ChallengeStatus.COMPLETED:
                     # Auto-skip juniors that haven't finished
-                    await challenge_junior_service.skip_unfinished_for_challenge(challenge_id)
+                    await challenge_employee_service.skip_unfinished_for_challenge(challenge_id)
 
             await self.challenge_repo.session.commit()
         except SQLAlchemyError:

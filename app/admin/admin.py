@@ -7,7 +7,7 @@ from app.auth.password import hash_password
 
 
 class UserAdmin(ModelView, model=User):
-    column_list = ["id", "username", "email", "role", "is_active"]
+    column_list = ["id", "username", "role", "is_active"]
     column_details_exclude_list = ["password_hash"]
     form_excluded_columns = ["password_hash"]
     

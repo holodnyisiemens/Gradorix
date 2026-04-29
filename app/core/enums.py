@@ -4,7 +4,7 @@ from enum import StrEnum
 class UserRole(StrEnum):
     HR = "HR"
     MENTOR = "MENTOR"
-    JUNIOR = "JUNIOR"
+    EMPLOYEE = "EMPLOYEE"
 
 
 class ChallengeStatus(StrEnum):
@@ -15,7 +15,7 @@ class ChallengeStatus(StrEnum):
     CANCELLED = "CANCELLED"
 
 
-class ChallengeJuniorProgress(StrEnum):
+class ChallengeEmployeeProgress(StrEnum):
     GOING = "GOING"
     IN_PROGRESS = "IN_PROGRESS"
     DONE = "DONE"

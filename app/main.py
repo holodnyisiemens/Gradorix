@@ -9,10 +9,10 @@ from app.admin.admin import register_all_models
 from app.core.config import settings
 from app.routers import (
     users,
-    mentor_junior,
+    mentor_employee,
     notifications,
     challenges,
-    challenge_junior,
+    challenge_employee,
     calendar_events,
     achievements,
     user_achievements,
@@ -44,10 +44,10 @@ app.add_middleware(
 )
 
 app.include_router(users.router)
-app.include_router(mentor_junior.router)
+app.include_router(mentor_employee.router)
 app.include_router(notifications.router)
 app.include_router(challenges.router)
-app.include_router(challenge_junior.router)
+app.include_router(challenge_employee.router)
 app.include_router(calendar_events.router)
 app.include_router(achievements.router)
 app.include_router(user_achievements.router)

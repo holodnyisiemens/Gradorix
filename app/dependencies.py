@@ -4,9 +4,9 @@ from fastapi import Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.database import async_session_factory
-from app.repositories.challenge_junior_repository import ChallengeJuniorRepository
+from app.repositories.challenge_employee_repository import ChallengeEmployeeRepository
 from app.repositories.challenge_repository import ChallengeRepository
-from app.repositories.mentor_junior_repository import MentorJuniorRepository
+from app.repositories.mentor_employee_repository import MentorEmployeeRepository
 from app.repositories.notification_repository import NotificationRepository
 from app.repositories.user_repository import UserRepository
 from app.repositories.calendar_event_repository import CalendarEventRepository
@@ -21,9 +21,9 @@ from app.repositories.kb_repository import KBSectionRepository, KBArticleReposit
 from app.repositories.meeting_attendance_repository import MeetingAttendanceRepository
 from app.repositories.push_subscription_repository import PushSubscriptionRepository
 
-from app.services.challenge_junior_service import ChallengeJuniorService
+from app.services.challenge_employee_service import ChallengeEmployeeService
 from app.services.challenge_service import ChallengeService
-from app.services.mentor_junior_service import MentorJuniorService
+from app.services.mentor_employee_service import MentorEmployeeService
 from app.services.notification_service import NotificationService
 from app.services.user_service import UserService
 from app.services.calendar_event_service import CalendarEventService
@@ -51,8 +51,8 @@ def get_user_service(session: SessionDep) -> UserService:
     return UserService(UserRepository(session))
 
 
-def get_mentor_junior_service(session: SessionDep) -> MentorJuniorService:
-    return MentorJuniorService(MentorJuniorRepository(session))
+def get_mentor_employee_service(session: SessionDep) -> MentorEmployeeService:
+    return MentorEmployeeService(MentorEmployeeRepository(session))
 
 
 def get_notification_service(session: SessionDep) -> NotificationService:
@@ -63,8 +63,8 @@ def get_challenge_service(session: SessionDep) -> ChallengeService:
     return ChallengeService(ChallengeRepository(session))
 
 
-def get_challenge_junior_service(session: SessionDep) -> ChallengeJuniorService:
-    return ChallengeJuniorService(ChallengeJuniorRepository(session), UserPointsRepository(session))
+def get_challenge_employee_service(session: SessionDep) -> ChallengeEmployeeService:
+    return ChallengeEmployeeService(ChallengeEmployeeRepository(session), UserPointsRepository(session))
 
 
 def get_calendar_event_service(session: SessionDep) -> CalendarEventService:
@@ -120,10 +120,10 @@ def get_push_service(session: SessionDep) -> PushService:
 
 
 UserServiceDep = Annotated[UserService, Depends(get_user_service)]
-MentorJuniorServiceDep = Annotated[MentorJuniorService, Depends(get_mentor_junior_service)]
+MentorEmployeeServiceDep = Annotated[MentorEmployeeService, Depends(get_mentor_employee_service)]
 NotificationServiceDep = Annotated[NotificationService, Depends(get_notification_service)]
 ChallengeServiceDep = Annotated[ChallengeService, Depends(get_challenge_service)]
-ChallengeJuniorServiceDep = Annotated[ChallengeJuniorService, Depends(get_challenge_junior_service)]
+ChallengeEmployeeServiceDep = Annotated[ChallengeEmployeeService, Depends(get_challenge_employee_service)]
 CalendarEventServiceDep = Annotated[CalendarEventService, Depends(get_calendar_event_service)]
 AchievementServiceDep = Annotated[AchievementService, Depends(get_achievement_service)]
 UserAchievementServiceDep = Annotated[UserAchievementService, Depends(get_user_achievement_service)]

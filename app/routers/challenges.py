@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends
 
 from app.auth.utils import get_current_user, require_roles
 from app.core.enums import UserRole
-from app.dependencies import ChallengeServiceDep, ChallengeJuniorServiceDep
+from app.dependencies import ChallengeServiceDep, ChallengeEmployeeServiceDep
 from app.models.user import User
 from app.schemas.challenge import ChallengeCreateDTO, ChallengeReadDTO, ChallengeUpdateDTO
 
@@ -14,8 +14,7 @@ async def get_all(
     service: ChallengeServiceDep,
     current_user: User = Depends(get_current_user),
 ):
-    # JUNIOR doesn't see DRAFT challenges
-    exclude_draft = current_user.role == UserRole.JUNIOR
+    exclude_draft = current_user.role == UserRole.EMPLOYEE
     return await service.get_all(exclude_draft=exclude_draft)
 
 
@@ -42,10 +41,10 @@ async def update(
     challenge_id: int,
     data: ChallengeUpdateDTO,
     service: ChallengeServiceDep,
-    cj_service: ChallengeJuniorServiceDep,
+    cj_service: ChallengeEmployeeServiceDep,
     _: User = Depends(require_roles(UserRole.HR)),
 ):
-    return await service.update(challenge_id, data, challenge_junior_service=cj_service)
+    return await service.update(challenge_id, data, challenge_employee_service=cj_service)
 
 
 @router.delete("/{challenge_id}", status_code=204)

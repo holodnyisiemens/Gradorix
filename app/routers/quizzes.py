@@ -41,10 +41,10 @@ async def create(
     result = await service.create(data)
 
     try:
-        juniors = await user_service.get_all_by_role(UserRole.JUNIOR)
-        for junior in juniors:
+        employees = await user_service.get_all_by_role(UserRole.EMPLOYEE)
+        for employee in employees:
             await push_notification(
-                junior.id,
+                employee.id,
                 f"📊 Доступен новый тест «{result.title}»",
                 notification_service,
             )
