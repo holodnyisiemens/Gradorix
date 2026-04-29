@@ -37,6 +37,7 @@ class KBArticleReadDTO(BaseDTO):
     content: str
     created_at: datetime.date
     author: str
+    attachments: Optional[list[str]] = None  # list of file URLs
 
 
 class KBArticleUpdateDTO(BaseDTO):
