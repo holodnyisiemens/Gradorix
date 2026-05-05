@@ -21,7 +21,7 @@ from app.core.config import settings
 
 ALLOWED_FILE_TYPES = {'.pdf', '.doc', '.docx', '.xls', '.xlsx', '.txt', '.ppt', '.pptx', 
                      '.png', '.jpg', '.jpeg', '.gif', '.webp', '.zip', '.rar'}
-MAX_FILE_SIZE = 1000 * 1024 * 1024
+MAX_FILE_SIZE = 300 * 1024 * 1024
 MAX_FILES_PER_ARTICLE = 5
 
 
