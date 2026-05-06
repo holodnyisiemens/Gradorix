@@ -6,6 +6,27 @@ from sqlalchemy.ext.asyncio import AsyncEngine
 from app.core.database import async_engine
 from app.core import enums as enums_module
 from enum import Enum
+from pathlib import Path
+from uuid import uuid4
+import pandas as pd
+
+
+def generate_excel(rows, filename: str = "report.xlsx") -> tuple[str, str]:
+    """
+    Returns:
+        saved_filename, full_path
+    """
+    reports_dir = Path("reports")
+    reports_dir.mkdir(exist_ok=True)
+
+    saved_filename = f"{uuid4().hex}_{filename}"
+    full_path = reports_dir / saved_filename
+
+    df = pd.DataFrame([dict(row) for row in rows])
+    df.to_excel(full_path, index=False)
+
+    return saved_filename, str(full_path)
+
 
 
 def collect_enums() -> dict:

@@ -4,6 +4,7 @@ import json
 from typing import Dict, List
 
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect, Query, Depends
+from fastapi.responses import FileResponse
 from gigachat import GigaChat
 from gigachat.models import Chat, Messages, MessagesRole
 
@@ -17,6 +18,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.ws.utils import get_db_schema, validate_sql
 from asyncpg.exceptions import UndefinedTableError
+from pathlib import Path
+
 
 router = APIRouter(tags=["WebSocket"])
 
@@ -293,41 +296,83 @@ HR_AGENT_PROMPT = """
 Ты работаешь строго по схеме базы данных.
 
 Правила:
+
 1. Возвращай ответ ТОЛЬКО в JSON формате:
+
 {
-  "sql": "SELECT ...",
-  "params": {...},
+  "action": "chat | query | generate_excel",
+  "message": "",
+  "sql": "",
+  "params": {},
+  "filename": "",
   "need_clarification": false,
   "clarification_question": ""
 }
 
-2. Только SELECT-запросы
-   ❌ запрещено: INSERT, UPDATE, DELETE, DROP, ALTER, CREATE
+Где:
 
-3. Используй ТОЛЬКО существующие:
-   - таблицы
-   - поля
-   - связи
+- action="chat" → если это обычный вопрос без SQL
+- action="query" → если нужна выборка данных
+- action="generate_excel" → если нужен excel/xlsx отчет
 
-4. Если чего-то нет в схеме:
-   → НЕ генерируй SQL
-   → верни текстовую ошибку
+2. Если пользователь просит:
+- выгрузить отчет
+- excel
+- xlsx
+- экспортировать
+- скачать файл
+- сформировать отчет
+- выгрузить данные
+
+ТО обязательно используй:
+
+"action": "generate_excel"
+
+и заполни:
+- sql
+- params
+- filename
+
+пример:
+{
+  "action": "generate_excel",
+  "sql": "SELECT * FROM employees",
+  "params": {},
+  "filename": "employees_report.xlsx",
+  "need_clarification": false,
+  "clarification_question": ""
+}
+
+3. Только SELECT-запросы
+❌ запрещено:
+- INSERT
+- UPDATE
+- DELETE
+- DROP
+- ALTER
+- CREATE
+
+4. Используй только существующие:
+- таблицы
+- поля
+- связи
 
 5. Если запрос неясен:
-   → верни:
-   {
-     "sql": "",
-     "params": {},
-     "need_clarification": true,
-     "clarification_question": "..."
-   }
+{
+  "action": "query",
+  "sql": "",
+  "params": {},
+  "filename": "",
+  "need_clarification": true,
+  "clarification_question": "..."
+}
 
 6. Почти всегда используй LIMIT при списках
 
-7. НИКОГДА:
-   - не придумывай данные
-   - не объясняй SQL
-   - не добавляй markdown
+7. Никогда:
+- не придумывай данные
+- не объясняй SQL
+- не добавляй markdown
 
 ---
 
@@ -359,10 +404,18 @@ HR_AGENT_PROMPT = """
 - адаптируйся под пользователя
 """.strip()
 
-async def _run_hr_agent_sync(user_text: str, history: List[Messages], db: AsyncSession) -> str:
+async def _run_hr_agent_sync(
+    user_text: str,
+    history: List[Messages],
+    db: AsyncSession
+) -> dict:
     db_schema = await get_db_schema()
+
     messages = [
-        Messages(role=MessagesRole.SYSTEM, content=f"{HR_AGENT_PROMPT}\n{db_schema}"),
+        Messages(
+            role=MessagesRole.SYSTEM,
+            content=f"{HR_AGENT_PROMPT}\n{db_schema}"
+        ),
         *history,
         Messages(role=MessagesRole.USER, content=user_text),
     ]
@@ -378,22 +431,56 @@ async def _run_hr_agent_sync(user_text: str, history: List[Messages], db: AsyncS
     try:
         data = json.loads(raw_answer)
     except Exception:
-        answer = raw_answer
+        # fallback plain text
         history.append(Messages(role=MessagesRole.USER, content=user_text))
-        history.append(Messages(role=MessagesRole.ASSISTANT, content=answer))
-        return answer
+        history.append(Messages(role=MessagesRole.ASSISTANT, content=raw_answer))
+
+        return {
+            "type": "chat_reply",
+            "payload": {
+                "text": raw_answer,
+                "done": True
+            }
+        }
 
     if data.get("need_clarification"):
-        return data.get("clarification_question", "Уточните запрос")
+        return {
+            "type": "chat_reply",
+            "payload": {
+                "text": data.get(
+                    "clarification_question",
+                    "Уточните запрос"
+                ),
+                "done": True
+            }
+        }
 
-    sql = data.get("sql")
+    action = data.get("action", "query")
+    sql = data.get("sql", "")
     params = data.get("params", {})
 
-    if not sql:
-        answer = "Ошибка: SQL не найден в ответе модели"
+    if action == "chat":
+        message = data.get("message", "")
+
         history.append(Messages(role=MessagesRole.USER, content=user_text))
-        history.append(Messages(role=MessagesRole.ASSISTANT, content=answer))
-        return answer
+        history.append(Messages(role=MessagesRole.ASSISTANT, content=message))
+
+        return {
+            "type": "chat_reply",
+            "payload": {
+                "text": message,
+                "done": True
+            }
+        }
+
+    if not sql:
+        return {
+            "type": "error",
+            "payload": {
+                "code": "CHAT_ERROR",
+                "message": "SQL не найден"
+            }
+        }
 
     validate_sql(sql)
 
@@ -401,20 +488,61 @@ async def _run_hr_agent_sync(user_text: str, history: List[Messages], db: AsyncS
         result = await db.execute(text(sql), params)
         rows = result.mappings().all()
 
-        if not rows:
-            answer = "Данных не найдено"
-        else:
-            answer = json.dumps([dict(r) for r in rows], ensure_ascii=False, indent=2)
+        if action == "generate_excel":
+            from app.ws.utils import generate_excel
+
+            filename = data.get("filename") or "report.xlsx"
+
+            saved_filename, _ = generate_excel(rows, filename)
+
+            history.append(Messages(role=MessagesRole.USER, content=user_text))
+            history.append(
+                Messages(
+                    role=MessagesRole.ASSISTANT,
+                    content=f"Excel report created: {saved_filename}"
+                )
+            )
+
+            return {
+                "type": "excel_ready",
+                "payload": {
+                    "file_url": f"/reports/{saved_filename}",
+                    "filename": saved_filename
+                }
+            }
+
+        # default query response
+        answer = (
+            "Данных не найдено"
+            if not rows
+            else json.dumps(
+                [dict(r) for r in rows],
+                ensure_ascii=False,
+                indent=2
+            )
+        )
+
+        history.append(Messages(role=MessagesRole.USER, content=user_text))
+        history.append(Messages(role=MessagesRole.ASSISTANT, content=answer))
+
+        return {
+            "type": "chat_reply",
+            "payload": {
+                "text": answer,
+                "done": True
+            }
+        }
 
     except Exception as e:
-        # answer = f"Ошибка выполнения SQL: {undefined_table_error.sqlstate}"
         await db.rollback()
-        answer = f"Ошибка при выполнении запроса: {str(e.__context__.__cause__)}"
 
-    history.append(Messages(role=MessagesRole.USER, content=user_text))
-    history.append(Messages(role=MessagesRole.ASSISTANT, content=answer))
-
-    return answer
+        return {
+            "type": "error",
+            "payload": {
+                "code": "CHAT_ERROR",
+                "message": f"Ошибка выполнения запроса: {str(e)}"
+            }
+        }
 
 
 def _run_gigachat_sync(user_text: str, history: List[Messages]) -> str:
@@ -509,21 +637,22 @@ async def websocket_endpoint(
 
                 try:
                     if user_role == "HR":
-                        answer = await _run_hr_agent_sync(
+                        response = await _run_hr_agent_sync(
                             user_text,
                             _chat_histories[user_id],
                             db
                         )
                     else:
-                        answer = await asyncio.to_thread(
+                        response = await asyncio.to_thread(
                             _run_gigachat_sync,
                             user_text,
                             _chat_histories[user_id]
                         )
-                    await ws.send_json({
-                        "type": "chat_reply",
-                        "payload": {"text": answer, "done": True},
-                    })
+                    # await ws.send_json({
+                    #     "type": "chat_reply",
+                    #     "payload": {"text": answer, "done": True},
+                    # })
+                    await ws.send_json(response)
                 except Exception as exc:
                     await ws.send_json({
                         "type": "error",
@@ -538,3 +667,14 @@ async def websocket_endpoint(
         pass
     finally:
         await manager.disconnect(user_id)
+
+
+@router.get("/reports/{filename}")
+async def download_report(filename: str):
+    file_path = Path("reports") / filename
+
+    return FileResponse(
+        path=file_path,
+        filename=filename,
+        media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    )
