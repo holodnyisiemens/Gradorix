@@ -9,7 +9,10 @@ RUN poetry install --no-root
 
 COPY . .
 
-COPY entrypoint.sh /entrypoint.sh
-RUN chmod +x /entrypoint.sh
+# Удалить дублирующую копию и исправить путь
+# COPY entrypoint.sh /entrypoint.sh  # <-- Удалить эту строку
 
-ENTRYPOINT ["/entrypoint.sh"]
+# Сделать файл исполняемым и конвертировать окончания строк
+RUN chmod +x /app/entrypoint.sh && sed -i 's/\r$//' /app/entrypoint.sh
+
+ENTRYPOINT ["/app/entrypoint.sh"]

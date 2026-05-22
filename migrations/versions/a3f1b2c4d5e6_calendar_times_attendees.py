@@ -18,28 +18,50 @@ depends_on: Union[str, Sequence[str], None] = None
 
 
 def upgrade() -> None:
-    op.add_column('calendar_events', sa.Column('start_time', sa.Time(), nullable=True))
-    op.add_column('calendar_events', sa.Column('end_time', sa.Time(), nullable=True))
-    op.add_column('calendar_events', sa.Column('created_by', sa.Integer(), nullable=True))
-    op.create_foreign_key(
-        'fk_calendar_events_created_by',
-        'calendar_events', 'users',
-        ['created_by'], ['id'],
-        ondelete='SET NULL',
-    )
-    op.create_table(
-        'calendar_event_attendees',
-        sa.Column('event_id', sa.Integer(), nullable=False),
-        sa.Column('user_id', sa.Integer(), nullable=False),
-        sa.ForeignKeyConstraint(['event_id'], ['calendar_events.id'], ondelete='CASCADE'),
-        sa.ForeignKeyConstraint(['user_id'], ['users.id'], ondelete='CASCADE'),
-        sa.PrimaryKeyConstraint('event_id', 'user_id'),
-    )
+    bind = op.get_bind()
+    inspector = sa.inspect(bind)
+    columns = [c['name'] for c in inspector.get_columns('calendar_events')]
+
+    if 'start_time' not in columns:
+        op.add_column('calendar_events', sa.Column('start_time', sa.Time(), nullable=True))
+    if 'end_time' not in columns:
+        op.add_column('calendar_events', sa.Column('end_time', sa.Time(), nullable=True))
+    if 'created_by' not in columns:
+        op.add_column('calendar_events', sa.Column('created_by', sa.Integer(), nullable=True))
+        op.create_foreign_key(
+            'fk_calendar_events_created_by',
+            'calendar_events', 'users',
+            ['created_by'], ['id'],
+            ondelete='SET NULL',
+        )
+
+    inspector = sa.inspect(bind)
+    tables = inspector.get_table_names()
+    if 'calendar_event_attendees' not in tables:
+        op.create_table(
+            'calendar_event_attendees',
+            sa.Column('event_id', sa.Integer(), nullable=False),
+            sa.Column('user_id', sa.Integer(), nullable=False),
+            sa.ForeignKeyConstraint(['event_id'], ['calendar_events.id'], ondelete='CASCADE'),
+            sa.ForeignKeyConstraint(['user_id'], ['users.id'], ondelete='CASCADE'),
+            sa.PrimaryKeyConstraint('event_id', 'user_id'),
+        )
 
 
 def downgrade() -> None:
-    op.drop_table('calendar_event_attendees')
-    op.drop_constraint('fk_calendar_events_created_by', 'calendar_events', type_='foreignkey')
-    op.drop_column('calendar_events', 'created_by')
-    op.drop_column('calendar_events', 'end_time')
-    op.drop_column('calendar_events', 'start_time')
+    bind = op.get_bind()
+    inspector = sa.inspect(bind)
+    tables = inspector.get_table_names()
+    if 'calendar_event_attendees' in tables:
+        op.drop_table('calendar_event_attendees')
+
+    inspector = sa.inspect(bind)
+    columns = [c['name'] for c in inspector.get_columns('calendar_events')]
+
+    if 'created_by' in columns:
+        op.drop_constraint('fk_calendar_events_created_by', 'calendar_events', type_='foreignkey')
+        op.drop_column('calendar_events', 'created_by')
+    if 'end_time' in columns:
+        op.drop_column('calendar_events', 'end_time')
+    if 'start_time' in columns:
+        op.drop_column('calendar_events', 'start_time')

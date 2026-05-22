@@ -112,7 +112,10 @@ def get_kb_article_service(session: SessionDep) -> KBArticleService:
 
 
 def get_meeting_attendance_service(session: SessionDep) -> MeetingAttendanceService:
-    return MeetingAttendanceService(MeetingAttendanceRepository(session))
+    return MeetingAttendanceService(
+        MeetingAttendanceRepository(session),
+        UserPointsRepository(session),
+    )
 
 
 def get_push_service(session: SessionDep) -> PushService:

@@ -1,7 +1,7 @@
 import datetime
 from typing import Optional
 
-from sqlalchemy import Boolean, DateTime, ForeignKey
+from sqlalchemy import Boolean, DateTime, ForeignKey, Integer
 from sqlalchemy.orm import Mapped, mapped_column
 
 from app.core.database import Base
@@ -35,3 +35,5 @@ class MeetingAttendance(Base):
         ForeignKey("users.id", ondelete="SET NULL"),
         nullable=True,
     )
+
+    awarded_points: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)

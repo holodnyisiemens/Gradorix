@@ -17,29 +17,96 @@ depends_on: Union[str, Sequence[str], None] = None
 
 
 def upgrade() -> None:
-    # Rename enum value in user_role
-    op.execute("ALTER TYPE user_role RENAME VALUE 'JUNIOR' TO 'EMPLOYEE'")
+    op.execute("""
+DO $$
+BEGIN
+    IF EXISTS (
+        SELECT 1 FROM pg_type WHERE typname = 'user_role'
+    ) AND EXISTS (
+        SELECT 1 FROM unnest(enum_range(NULL::user_role)) x WHERE x::text = 'JUNIOR'
+    ) THEN
+        ALTER TYPE user_role RENAME VALUE 'JUNIOR' TO 'EMPLOYEE';
+    END IF;
 
-    # Rename challenge_junior_progress enum type
-    op.execute("ALTER TYPE challenge_junior_progress RENAME TO challenge_employee_progress")
+    IF EXISTS (
+        SELECT 1 FROM pg_type WHERE typname = 'challenge_junior_progress'
+    ) THEN
+        ALTER TYPE challenge_junior_progress RENAME TO challenge_employee_progress;
+    END IF;
 
-    # Rename junior_id column in challenge_junior table
-    op.execute("ALTER TABLE challenge_junior RENAME COLUMN junior_id TO employee_id")
+    IF EXISTS (
+        SELECT 1 FROM information_schema.columns
+        WHERE table_name = 'challenge_junior' AND column_name = 'junior_id'
+    ) THEN
+        ALTER TABLE challenge_junior RENAME COLUMN junior_id TO employee_id;
+    END IF;
 
-    # Rename junior_id column in mentor_junior table
-    op.execute("ALTER TABLE mentor_junior RENAME COLUMN junior_id TO employee_id")
+    IF EXISTS (
+        SELECT 1 FROM information_schema.columns
+        WHERE table_name = 'mentor_junior' AND column_name = 'junior_id'
+    ) THEN
+        ALTER TABLE mentor_junior RENAME COLUMN junior_id TO employee_id;
+    END IF;
 
-    # Rename tables
-    op.execute("ALTER TABLE challenge_junior RENAME TO challenge_employee")
-    op.execute("ALTER TABLE mentor_junior RENAME TO mentor_employee")
+    IF EXISTS (
+        SELECT 1 FROM information_schema.tables WHERE table_name = 'challenge_junior'
+    ) THEN
+        ALTER TABLE challenge_junior RENAME TO challenge_employee;
+    END IF;
+
+    IF EXISTS (
+        SELECT 1 FROM information_schema.tables WHERE table_name = 'mentor_junior'
+    ) THEN
+        ALTER TABLE mentor_junior RENAME TO mentor_employee;
+    END IF;
+END
+$$;
+""")
 
 
 def downgrade() -> None:
-    op.execute("ALTER TABLE mentor_employee RENAME TO mentor_junior")
-    op.execute("ALTER TABLE challenge_employee RENAME TO challenge_junior")
+    op.execute("""
+DO $$
+BEGIN
+    IF EXISTS (
+        SELECT 1 FROM information_schema.tables WHERE table_name = 'mentor_employee'
+    ) THEN
+        ALTER TABLE mentor_employee RENAME TO mentor_junior;
+    END IF;
 
-    op.execute("ALTER TABLE mentor_junior RENAME COLUMN employee_id TO junior_id")
-    op.execute("ALTER TABLE challenge_junior RENAME COLUMN employee_id TO junior_id")
+    IF EXISTS (
+        SELECT 1 FROM information_schema.tables WHERE table_name = 'challenge_employee'
+    ) THEN
+        ALTER TABLE challenge_employee RENAME TO challenge_junior;
+    END IF;
 
-    op.execute("ALTER TYPE challenge_employee_progress RENAME TO challenge_junior_progress")
-    op.execute("ALTER TYPE user_role RENAME VALUE 'EMPLOYEE' TO 'JUNIOR'")
+    IF EXISTS (
+        SELECT 1 FROM information_schema.columns
+        WHERE table_name = 'mentor_junior' AND column_name = 'employee_id'
+    ) THEN
+        ALTER TABLE mentor_junior RENAME COLUMN employee_id TO junior_id;
+    END IF;
+
+    IF EXISTS (
+        SELECT 1 FROM information_schema.columns
+        WHERE table_name = 'challenge_junior' AND column_name = 'employee_id'
+    ) THEN
+        ALTER TABLE challenge_junior RENAME COLUMN employee_id TO junior_id;
+    END IF;
+
+    IF EXISTS (
+        SELECT 1 FROM pg_type WHERE typname = 'challenge_employee_progress'
+    ) THEN
+        ALTER TYPE challenge_employee_progress RENAME TO challenge_junior_progress;
+    END IF;
+
+    IF EXISTS (
+        SELECT 1 FROM pg_type WHERE typname = 'user_role'
+    ) AND EXISTS (
+        SELECT 1 FROM unnest(enum_range(NULL::user_role)) x WHERE x::text = 'EMPLOYEE'
+    ) THEN
+        ALTER TYPE user_role RENAME VALUE 'EMPLOYEE' TO 'JUNIOR';
+    END IF;
+END
+$$;
+""")

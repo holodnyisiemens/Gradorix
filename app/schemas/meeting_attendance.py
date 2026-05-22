@@ -10,6 +10,7 @@ class MeetingAttendanceCreateDTO(BaseDTO):
     attended: bool = False
     marked_at: Optional[datetime.datetime] = None
     marked_by: Optional[int] = None
+    awarded_points: Optional[int] = None
 
 
 class MeetingAttendanceReadDTO(BaseDTO):
@@ -19,9 +20,11 @@ class MeetingAttendanceReadDTO(BaseDTO):
     attended: bool
     marked_at: Optional[datetime.datetime] = None
     marked_by: Optional[int] = None
+    awarded_points: Optional[int] = None
 
 
 class MeetingAttendanceUpdateDTO(BaseDTO):
     attended: Optional[bool] = None
     marked_at: Optional[datetime.datetime] = None
     marked_by: Optional[int] = None
+    awarded_points: Optional[int] = None
