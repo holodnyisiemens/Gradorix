@@ -83,7 +83,7 @@ async def update(
 
     result = await service.update(challenge_id, employee_id, data)
 
-    if data.progress == ChallengeEmployeeProgress.DONE:
+    if data.progress == ChallengeEmployeeProgress.DONE and current_user.role == UserRole.EMPLOYEE:
         try:
             employee_name = current_user.username
             await push_notification(
