@@ -21,6 +21,8 @@ from app.routers import (
     teams,
     quizzes,
     quiz_results,
+    surveys,
+    survey_results,
     kb,
     meeting_attendance,
     auth,
@@ -55,7 +57,9 @@ app.include_router(user_points.router)
 app.include_router(activities.router)
 app.include_router(teams.router)
 app.include_router(quizzes.router)
+app.include_router(surveys.router)
 app.include_router(quiz_results.router)
+app.include_router(survey_results.router)
 app.include_router(kb.router)
 app.include_router(meeting_attendance.router)
 app.include_router(auth.router)

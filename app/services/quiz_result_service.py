@@ -5,6 +5,7 @@ from sqlalchemy.exc import SQLAlchemyError, IntegrityError
 from starlette import status
 
 from app.models.quiz_result import QuizResult
+from app.repositories.quiz_repository import QuizRepository
 from app.repositories.quiz_result_repository import QuizResultRepository
 from app.repositories.user_points_repository import UserPointsRepository
 from app.schemas.quiz_result import QuizResultCreateDTO, QuizResultReadDTO, QuizResultUpdateDTO
@@ -13,13 +14,22 @@ from app.core.points_utils import recalculate_level
 
 
 class QuizResultService:
-    def __init__(self, repo: QuizResultRepository, points_repo: UserPointsRepository):
+    def __init__(
+        self,
+        repo: QuizResultRepository,
+        points_repo: UserPointsRepository,
+        quiz_repo: QuizRepository,
+    ):
         self.repo = repo
         self.points_repo = points_repo
+        self.quiz_repo = quiz_repo
 
     async def _get_or_404(self, result_id: int) -> QuizResult:
         obj = await self.repo.get_by_id(result_id)
         if not obj:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"QuizResult {result_id} not found")
+        quiz = await self.quiz_repo.get_by_id(obj.quiz_id)
+        if not quiz or quiz.is_survey:
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"QuizResult {result_id} not found")
         return obj
 
@@ -31,10 +41,18 @@ class QuizResultService:
         user_id: Optional[int] = None,
         quiz_id: Optional[int] = None,
     ) -> list[QuizResultReadDTO]:
-        items = await self.repo.get_all(user_id=user_id, quiz_id=quiz_id)
+        items = await self.repo.get_all(user_id=user_id, quiz_id=quiz_id, is_survey=False)
         return [QuizResultReadDTO.model_validate(r) for r in items]
 
     async def create(self, data: QuizResultCreateDTO) -> QuizResultReadDTO:
+        quiz = await self.quiz_repo.get_by_id(data.quiz_id)
+        if not quiz or quiz.is_survey:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Quiz {data.quiz_id} not found")
+        if await self.repo.exists_for_user(data.user_id, data.quiz_id):
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail="Quiz already completed by this user",
+            )
         try:
             obj = await self.repo.create(data)
 

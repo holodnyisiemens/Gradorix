@@ -16,9 +16,10 @@ router = APIRouter(prefix="/quizzes", tags=["Quizzes"])
 async def get_all(
     available: Optional[bool] = None,
     service: QuizServiceDep = ...,
-    _: User = Depends(get_current_user),
+    user: User = Depends(get_current_user),
 ):
-    return await service.get_all(available=available)
+    exclude_completed = user.id if available is True else None
+    return await service.get_all(available=available, exclude_completed_for_user_id=exclude_completed)
 
 
 @router.get("/{quiz_id}", response_model=QuizReadDTO)

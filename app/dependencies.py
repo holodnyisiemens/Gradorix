@@ -34,6 +34,8 @@ from app.services.activity_service import ActivityService
 from app.services.team_service import TeamService
 from app.services.quiz_service import QuizService
 from app.services.quiz_result_service import QuizResultService
+from app.services.survey_service import SurveyService
+from app.services.survey_result_service import SurveyResultService
 from app.services.kb_service import KBSectionService, KBArticleService
 from app.services.meeting_attendance_service import MeetingAttendanceService
 from app.services.push_service import PushService
@@ -96,11 +98,23 @@ def get_team_service(session: SessionDep) -> TeamService:
 
 
 def get_quiz_service(session: SessionDep) -> QuizService:
-    return QuizService(QuizRepository(session))
+    return QuizService(QuizRepository(session), QuizResultRepository(session))
 
 
 def get_quiz_result_service(session: SessionDep) -> QuizResultService:
-    return QuizResultService(QuizResultRepository(session), UserPointsRepository(session))
+    return QuizResultService(
+        QuizResultRepository(session),
+        UserPointsRepository(session),
+        QuizRepository(session),
+    )
+
+
+def get_survey_service(session: SessionDep) -> SurveyService:
+    return SurveyService(QuizRepository(session), QuizResultRepository(session))
+
+
+def get_survey_result_service(session: SessionDep) -> SurveyResultService:
+    return SurveyResultService(QuizResultRepository(session), QuizRepository(session))
 
 
 def get_kb_section_service(session: SessionDep) -> KBSectionService:
@@ -135,6 +149,8 @@ ActivityServiceDep = Annotated[ActivityService, Depends(get_activity_service)]
 TeamServiceDep = Annotated[TeamService, Depends(get_team_service)]
 QuizServiceDep = Annotated[QuizService, Depends(get_quiz_service)]
 QuizResultServiceDep = Annotated[QuizResultService, Depends(get_quiz_result_service)]
+SurveyServiceDep = Annotated[SurveyService, Depends(get_survey_service)]
+SurveyResultServiceDep = Annotated[SurveyResultService, Depends(get_survey_result_service)]
 KBSectionServiceDep = Annotated[KBSectionService, Depends(get_kb_section_service)]
 KBArticleServiceDep = Annotated[KBArticleService, Depends(get_kb_article_service)]
 MeetingAttendanceServiceDep = Annotated[MeetingAttendanceService, Depends(get_meeting_attendance_service)]
