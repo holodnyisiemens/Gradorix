@@ -2,7 +2,8 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.dependencies import UserServiceDep, get_session
-from app.schemas.user import UserCreateDTO, UserLogin
+from app.models.user import User
+from app.schemas.user import UserCreateDTO, UserLogin, UserChangePasswordDTO
 from app.schemas.token import TokenResponse, RefreshTokenRequest
 from app.auth.utils import (
     create_access_token,
@@ -10,6 +11,7 @@ from app.auth.utils import (
     store_refresh_token,
     verify_refresh_token,
     validate_password,
+    get_current_user,
 )
 
 router = APIRouter(prefix="/auth", tags=["Auth"])
@@ -59,6 +61,15 @@ async def login(
         "access_token": access_token,
         "refresh_token": refresh_token,
     }
+
+
+@router.post("/change-password", status_code=204)
+async def change_password(
+    data: UserChangePasswordDTO,
+    service: UserServiceDep,
+    current_user: User = Depends(get_current_user),
+):
+    await service.change_password(current_user.id, data)
 
 
 @router.post("/refresh", response_model=TokenResponse)

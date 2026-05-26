@@ -45,6 +45,13 @@ class UserRepository:
 
         return user
 
+    async def update_password(self, user: User, new_password: str) -> User:
+        """Обновить пароль пользователя"""
+        user.password_hash = hash_password(new_password)
+        await self.session.flush()
+        await self.session.refresh(user)
+        return user
+
     async def get_all(self) -> list[User]:
         """Получить всех пользователей"""
         stmt = select(User)

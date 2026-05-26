@@ -6,7 +6,14 @@ from starlette import status
 
 from app.models.user import User
 from app.repositories.user_repository import UserRepository
-from app.schemas.user import UserCreateDTO, UserReadDTO, UserUpdateDTO, UserLoginReadDTO
+from app.auth.password import validate_password
+from app.schemas.user import (
+    UserCreateDTO,
+    UserReadDTO,
+    UserUpdateDTO,
+    UserLoginReadDTO,
+    UserChangePasswordDTO,
+)
 
 
 class UserService:
@@ -127,4 +134,23 @@ class UserService:
         if user:
             return UserLoginReadDTO.model_validate(user)
         return None
-    
+
+    async def change_password(self, user_id: int, data: UserChangePasswordDTO) -> None:
+        """Сменить пароль пользователя"""
+        user = await self._get_or_404(user_id)
+
+        if not validate_password(data.old_password, user.password_hash):
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Invalid old password",
+            )
+
+        try:
+            await self.user_repo.update_password(user, data.new_password)
+            await self.user_repo.session.commit()
+        except SQLAlchemyError:
+            await self.user_repo.session.rollback()
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Password change error",
+            )
