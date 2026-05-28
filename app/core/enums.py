@@ -55,3 +55,8 @@ class TeamStatus(StrEnum):
     ACTIVE = "active"
     ON_HOLD = "on_hold"
     COMPLETED = "completed"
+
+
+class ReportFileFormat(StrEnum):
+    EXCEL = "excel"
+    PDF = "pdf"

@@ -5,10 +5,26 @@ import inspect as py_inspect
 from sqlalchemy.ext.asyncio import AsyncEngine
 from app.core.database import async_engine
 from app.core import enums as enums_module
+from app.core.enums import ReportFileFormat
 from enum import Enum
 from pathlib import Path
 from uuid import uuid4
 import pandas as pd
+from xhtml2pdf import pisa
+
+
+REPORTS_DIR = Path("reports")
+
+
+def _ensure_reports_dir() -> Path:
+    REPORTS_DIR.mkdir(exist_ok=True)
+    return REPORTS_DIR
+
+
+def normalize_report_filename(filename: str | None, report_format: str) -> str:
+    stem = Path((filename or "report").strip() or "report").stem
+    ext = ".pdf" if report_format == ReportFileFormat.PDF else ".xlsx"
+    return f"{stem}{ext}"
 
 
 def generate_excel(rows, filename: str = "report.xlsx") -> tuple[str, str]:
@@ -16,8 +32,7 @@ def generate_excel(rows, filename: str = "report.xlsx") -> tuple[str, str]:
     Returns:
         saved_filename, full_path
     """
-    reports_dir = Path("reports")
-    reports_dir.mkdir(exist_ok=True)
+    reports_dir = _ensure_reports_dir()
 
     saved_filename = f"{uuid4().hex}_{filename}"
     full_path = reports_dir / saved_filename
@@ -26,6 +41,46 @@ def generate_excel(rows, filename: str = "report.xlsx") -> tuple[str, str]:
     df.to_excel(full_path, index=False)
 
     return saved_filename, str(full_path)
+
+
+def generate_pdf(rows, filename: str = "report.pdf") -> tuple[str, str]:
+    """
+    Returns:
+        saved_filename, full_path
+    """
+    reports_dir = _ensure_reports_dir()
+
+    saved_filename = f"{uuid4().hex}_{filename}"
+    full_path = reports_dir / saved_filename
+
+    df = pd.DataFrame([dict(row) for row in rows])
+    html = f"""<!DOCTYPE html>
+<html>
+<head><meta charset="utf-8"><style>
+  body {{ font-family: DejaVu Sans, Arial, sans-serif; font-size: 10px; }}
+  table {{ border-collapse: collapse; width: 100%; }}
+  th, td {{ border: 1px solid #ccc; padding: 4px 6px; text-align: left; }}
+  th {{ background: #f0f0f0; }}
+</style></head>
+<body>{df.to_html(index=False, escape=True)}</body>
+</html>"""
+
+    with open(full_path, "wb") as pdf_file:
+        status = pisa.CreatePDF(html, dest=pdf_file, encoding="utf-8")
+        if status.err:
+            raise RuntimeError("Не удалось сформировать PDF-отчёт")
+
+    return saved_filename, str(full_path)
+
+
+def generate_report_file(
+    rows,
+    filename: str,
+    report_format: str,
+) -> tuple[str, str]:
+    if report_format == ReportFileFormat.PDF:
+        return generate_pdf(rows, filename)
+    return generate_excel(rows, filename)
 
 
 

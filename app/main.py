@@ -1,5 +1,8 @@
+from pathlib import Path
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 
 from sqladmin import Admin
 from app.core.database import async_engine
@@ -32,6 +35,10 @@ from app.routers import (
 from app.minio.init_minio import init_bucket
 
 app = FastAPI(title="Gradorix")
+
+reports_dir = Path("reports")
+reports_dir.mkdir(exist_ok=True)
+app.mount("/reports", StaticFiles(directory=reports_dir), name="reports")
 
 admin = Admin(app, async_engine, authentication_backend=AdminAuth(secret_key="очень-секретный-ключ"), title="Admin Panel", base_url="/admin")
 
