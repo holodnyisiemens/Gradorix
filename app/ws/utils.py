@@ -14,6 +14,15 @@ from xhtml2pdf import pisa
 
 
 REPORTS_DIR = Path("reports")
+_FONTS_DIR = Path(__file__).resolve().parents[2] / "assets" / "fonts"
+_DEJAVU_FONT = _FONTS_DIR / "DejaVuSans.ttf"
+PDF_FONT_FAMILY = "DejaVuSans"
+
+
+def _pdf_font_link_callback(uri: str, rel: str) -> str:
+    if uri.endswith(_DEJAVU_FONT.name):
+        return str(_DEJAVU_FONT.resolve())
+    return uri
 
 
 def _ensure_reports_dir() -> Path:
@@ -54,19 +63,41 @@ def generate_pdf(rows, filename: str = "report.pdf") -> tuple[str, str]:
     full_path = reports_dir / saved_filename
 
     df = pd.DataFrame([dict(row) for row in rows])
+
+    if not _DEJAVU_FONT.exists():
+        raise RuntimeError(
+            "Шрифт DejaVuSans.ttf не найден. Ожидается путь: assets/fonts/DejaVuSans.ttf"
+        )
+
     html = f"""<!DOCTYPE html>
 <html>
-<head><meta charset="utf-8"><style>
-  body {{ font-family: DejaVu Sans, Arial, sans-serif; font-size: 10px; }}
+<head>
+<meta charset="utf-8" />
+<style>
+  @font-face {{
+    font-family: {PDF_FONT_FAMILY};
+    src: url("{_DEJAVU_FONT.name}");
+  }}
+  body, table, th, td {{
+    font-family: {PDF_FONT_FAMILY}, sans-serif;
+    font-size: 10px;
+  }}
   table {{ border-collapse: collapse; width: 100%; }}
   th, td {{ border: 1px solid #ccc; padding: 4px 6px; text-align: left; }}
   th {{ background: #f0f0f0; }}
-</style></head>
+</style>
+</head>
 <body>{df.to_html(index=False, escape=True)}</body>
 </html>"""
 
     with open(full_path, "wb") as pdf_file:
-        status = pisa.CreatePDF(html, dest=pdf_file, encoding="utf-8")
+        status = pisa.CreatePDF(
+            html,
+            dest=pdf_file,
+            encoding="utf-8",
+            path=str(_FONTS_DIR),
+            link_callback=_pdf_font_link_callback,
+        )
         if status.err:
             raise RuntimeError("Не удалось сформировать PDF-отчёт")
 
