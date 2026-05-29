@@ -31,8 +31,10 @@ from app.routers import (
     auth,
     ws,
     push,
+    mentor_chat,
 )
 from app.minio.init_minio import init_bucket
+from app.core.mongo import close_mongo, init_mongo
 
 app = FastAPI(title="Gradorix")
 
@@ -72,11 +74,18 @@ app.include_router(meeting_attendance.router)
 app.include_router(auth.router)
 app.include_router(ws.router)
 app.include_router(push.router)
+app.include_router(mentor_chat.router)
 
 
 @app.on_event("startup")
-def startup():
+async def startup():
     init_bucket()
+    await init_mongo()
+
+
+@app.on_event("shutdown")
+async def shutdown():
+    await close_mongo()
 
 
 if __name__ == "__main__":

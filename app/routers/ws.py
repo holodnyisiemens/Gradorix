@@ -3,14 +3,15 @@ import asyncio
 import json
 from typing import Dict, List, Optional
 
-from fastapi import APIRouter, WebSocket, WebSocketDisconnect, Query, Depends
+from fastapi import APIRouter, WebSocket, WebSocketDisconnect, Query, Depends, HTTPException
 from gigachat import GigaChat
 from gigachat.models import Chat, Messages, MessagesRole
 
 from app.auth.utils import get_current_user
 from app.core.config import settings
 from app.ws.manager import manager
-from app.dependencies import get_session
+from app.dependencies import get_session, MentorChatServiceDep, NotificationServiceDep
+from app.ws.notify import push_notification
 
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -543,7 +544,9 @@ def _run_gigachat_sync(user_text: str, history: List[Messages]) -> str:
 async def websocket_endpoint(
     ws: WebSocket,
     token: str = Query(...),
-    db: AsyncSession = Depends(get_session)
+    db: AsyncSession = Depends(get_session),
+    mentor_chat_service: MentorChatServiceDep = ...,
+    notification_service: NotificationServiceDep = ...,
 ) -> None:
     """
     WebSocket endpoint.
@@ -586,6 +589,60 @@ async def websocket_endpoint(
 
             if msg_type == "ping":
                 await ws.send_json({"type": "pong"})
+
+            elif msg_type == "mentor_chat_send":
+                payload = msg.get("payload") or {}
+                peer_id = payload.get("peer_id")
+                text = (payload.get("text") or "").strip()
+
+                if peer_id is None or not text:
+                    await ws.send_json({
+                        "type": "error",
+                        "payload": {
+                            "code": "CHAT_ERROR",
+                            "message": "peer_id и text обязательны",
+                        },
+                    })
+                    continue
+
+                try:
+                    message = await mentor_chat_service.send_message(
+                        user, int(peer_id), text
+                    )
+                except HTTPException as exc:
+                    code = (
+                        "CHAT_NOT_PAIRED"
+                        if exc.status_code == 404
+                        else "CHAT_FORBIDDEN"
+                        if exc.status_code == 403
+                        else "CHAT_ERROR"
+                    )
+                    await ws.send_json({
+                        "type": "error",
+                        "payload": {"code": code, "message": str(exc.detail)},
+                    })
+                    continue
+
+                out = {
+                    "type": "mentor_chat_message",
+                    "payload": message.model_dump(mode="json"),
+                }
+                await ws.send_json(out)
+
+                recipient_id = mentor_chat_service.recipient_id(
+                    user, message.mentor_id, message.employee_id
+                )
+                delivered = await manager.send_to_user(recipient_id, out)
+                if not delivered:
+                    try:
+                        await push_notification(
+                            recipient_id,
+                            f"💬 Новое сообщение от {user.username}",
+                            notification_service,
+                            link="/chat",
+                        )
+                    except Exception:
+                        pass
 
             elif msg_type == "chat_message":
                 user_text: str = (msg.get("payload") or {}).get("text", "").strip()

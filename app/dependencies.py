@@ -20,6 +20,9 @@ from app.repositories.quiz_result_repository import QuizResultRepository
 from app.repositories.kb_repository import KBSectionRepository, KBArticleRepository
 from app.repositories.meeting_attendance_repository import MeetingAttendanceRepository
 from app.repositories.push_subscription_repository import PushSubscriptionRepository
+from app.repositories.mentor_chat_mongo_repository import MentorChatMongoRepository
+
+from app.core.mongo import get_database
 
 from app.services.challenge_employee_service import ChallengeEmployeeService
 from app.services.challenge_service import ChallengeService
@@ -39,6 +42,7 @@ from app.services.survey_result_service import SurveyResultService
 from app.services.kb_service import KBSectionService, KBArticleService
 from app.services.meeting_attendance_service import MeetingAttendanceService
 from app.services.push_service import PushService
+from app.services.mentor_chat_service import MentorChatService
 
 
 async def get_session() -> AsyncSession:
@@ -136,6 +140,13 @@ def get_push_service(session: SessionDep) -> PushService:
     return PushService(PushSubscriptionRepository(session))
 
 
+def get_mentor_chat_service(session: SessionDep) -> MentorChatService:
+    return MentorChatService(
+        MentorEmployeeRepository(session),
+        MentorChatMongoRepository(get_database()),
+    )
+
+
 UserServiceDep = Annotated[UserService, Depends(get_user_service)]
 MentorEmployeeServiceDep = Annotated[MentorEmployeeService, Depends(get_mentor_employee_service)]
 NotificationServiceDep = Annotated[NotificationService, Depends(get_notification_service)]
@@ -155,3 +166,4 @@ KBSectionServiceDep = Annotated[KBSectionService, Depends(get_kb_section_service
 KBArticleServiceDep = Annotated[KBArticleService, Depends(get_kb_article_service)]
 MeetingAttendanceServiceDep = Annotated[MeetingAttendanceService, Depends(get_meeting_attendance_service)]
 PushServiceDep = Annotated[PushService, Depends(get_push_service)]
+MentorChatServiceDep = Annotated[MentorChatService, Depends(get_mentor_chat_service)]

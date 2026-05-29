@@ -10,6 +10,7 @@
 - **FastAPI** + **Uvicorn** (async, hot-reload)
 - **SQLAlchemy 2.0** async (asyncpg)
 - **PostgreSQL 15+**
+- **MongoDB 7** — сообщения чата ментор ↔ сотрудник
 - **Alembic** — миграции
 - **Pydantic v2** — валидация
 - **Poetry** — зависимости
@@ -27,9 +28,11 @@ docker compose up --build
 ```
 
 Контейнер сам:
-1. Ждёт готовности PostgreSQL
+1. Ждёт готовности PostgreSQL и MongoDB
 2. Применяет все миграции (`alembic upgrade head`)
 3. Запускает сервер на `http://0.0.0.0:8000`
+
+Переменные MongoDB (см. `.env.template`): `MONGO_HOST`, `MONGO_PORT`, `MONGO_USER`, `MONGO_PASSWORD`, `MONGO_DB`. В Docker `MONGO_HOST=mongo`; при локальном запуске бэкенда без compose — `MONGO_HOST=localhost`.
 
 **Swagger UI:** [http://localhost:8000/docs](http://localhost:8000/docs)
 **ReDoc:** [http://localhost:8000/redoc](http://localhost:8000/redoc)

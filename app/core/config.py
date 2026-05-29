@@ -45,6 +45,12 @@ class Settings(BaseSettings):
     MINIO_SECRET_KEY: str = "supersecret"
     MINIO_BUCKET: str = "uploads"
 
+    MONGO_HOST: str = "localhost"
+    MONGO_PORT: int = 27017
+    MONGO_USER: str = "gradorix"
+    MONGO_PASSWORD: SecretStr = SecretStr("gradorix")
+    MONGO_DB: str = "gradorix_chat"
+
     run: RunConfig = RunConfig()
 
     @property
@@ -59,6 +65,14 @@ class Settings(BaseSettings):
         return (
             f"postgresql+psycopg://{self.DB_USER}:{self.DB_PASSWORD.get_secret_value()}@"
             f"{self.DB_HOST}:{self.DB_PORT}/{self.DB_NAME}"
+        )
+
+    @property
+    def mongo_url(self) -> str:
+        password = self.MONGO_PASSWORD.get_secret_value()
+        return (
+            f"mongodb://{self.MONGO_USER}:{password}@"
+            f"{self.MONGO_HOST}:{self.MONGO_PORT}/{self.MONGO_DB}?authSource=admin"
         )
 
 
